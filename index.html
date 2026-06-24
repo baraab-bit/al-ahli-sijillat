@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>سجل بيانات برامج خدمة المجتمع — البنك الأهلي السعودي</title>
+<meta name="description" content="نموذج جمع بيانات سجلات برامج المسؤولية المجتمعية (أهالينا) — البنك الأهلي السعودي." />
+
+<!-- Fonts: IBM Plex Sans Arabic (precise, government-grade Arabic) + IBM Plex Sans for Latin/numerals -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+
+<style>
+/* ===========================================================================
+   Design system — refined institutional (SNB green heritage)
+   =========================================================================== */
+:root {
+  /* SNB green family */
+  --snb-900: #0a3d2e;
+  --snb-800: #0f5240;
+  --snb-700: #156552;
+  --snb-600: #1f7d66;
+  --snb-500: #2e9b80;
+  --snb-100: #d9ece5;
+  --snb-050: #eef6f2;
+
+  /* warm sand neutrals */
+  --sand-050: #faf8f4;
+  --sand-100: #f3efe7;
+  --sand-200: #e7e1d4;
+  --sand-300: #d3cab7;
+  --ink-900: #1c241f;
+  --ink-700: #3c463f;
+  --ink-500: #69736b;
+  --ink-300: #9aa39c;
+
+  /* status tones */
+  --green:  #1f7d66; --green-bg:  #e3f1ec;
+  --amber:  #b07908; --amber-bg:  #fbf0d6;
+  --red:    #b23a48; --red-bg:    #f7e2e4;
+  --violet: #6b4ea8; --violet-bg: #ece4f7;
+
+  --gold: #b8932f;
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow-sm: 0 1px 2px rgba(28,36,31,.06), 0 1px 3px rgba(28,36,31,.05);
+  --shadow-md: 0 4px 14px rgba(15,82,64,.10), 0 1px 4px rgba(28,36,31,.06);
+  --shadow-lg: 0 18px 50px rgba(10,61,46,.14);
+
+  --font-body: "IBM Plex Sans Arabic", "IBM Plex Sans", system-ui, sans-serif;
+  --maxw: 1180px;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-weight: 400;
+  color: var(--ink-900);
+  background:
+    radial-gradient(1200px 480px at 90% -120px, var(--snb-050), transparent 60%),
+    radial-gradient(900px 420px at -10% -80px, #f0f5ee, transparent 55%),
+    var(--sand-050);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+:lang(en), .lat { font-family: "IBM Plex Sans", var(--font-body); }
+input, select, textarea, button { font-family: inherit; font-size: inherit; color: inherit; }
+h1, h2, h3 { font-weight: 600; line-height: 1.3; margin: 0; }
+
+/* ---- Header ------------------------------------------------------------- */
+.masthead {
+  background: linear-gradient(135deg, var(--snb-900), var(--snb-700) 70%);
+  color: #fff;
+  padding: 34px 0 30px;
+  position: relative;
+  overflow: hidden;
+  border-bottom: 3px solid var(--gold);
+}
+.masthead::after {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(115deg, rgba(255,255,255,.04) 0 2px, transparent 2px 22px);
+  pointer-events: none;
+}
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 22px; }
+.brandline { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+.crest {
+  width: 46px; height: 46px; border-radius: 11px; flex: none;
+  display: grid; place-items: center;
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.22);
+  font-weight: 700; font-size: 19px; letter-spacing: .5px; color: #fff;
+}
+.brandline .org { font-size: 13px; letter-spacing: .3px; color: #cfe6dd; }
+.brandline .org b { color: #fff; font-weight: 600; }
+.masthead h1 { font-size: clamp(22px, 3.2vw, 31px); max-width: 850px; }
+.masthead .sub { margin-top: 10px; color: #c8e2d8; font-size: 15px; max-width: 760px; }
+.metabar { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 18px; font-size: 12.5px; color: #bcdbd0; }
+.metabar span b { color: #eef7f3; font-weight: 500; }
+
+/* ---- Intro / instructions ---------------------------------------------- */
+.intro { margin: 26px auto 6px; max-width: var(--maxw); padding: 0 22px; }
+.intro-card {
+  background: #fff; border: 1px solid var(--sand-200); border-radius: var(--radius);
+  box-shadow: var(--shadow-sm); padding: 22px 24px;
+}
+.intro-card h2 { font-size: 17px; color: var(--snb-800); margin-bottom: 8px; display: flex; align-items: center; gap: 9px; }
+.intro-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 14px; }
+.howto { background: var(--sand-050); border: 1px solid var(--sand-200); border-radius: var(--radius-sm); padding: 13px 15px; }
+.howto .ic { font-size: 18px; }
+.howto h3 { font-size: 13.5px; color: var(--snb-700); margin: 6px 0 3px; }
+.howto p { font-size: 12.8px; color: var(--ink-700); margin: 0; }
+.notice {
+  margin-top: 16px; padding: 12px 15px; border-radius: var(--radius-sm);
+  background: var(--amber-bg); border: 1px solid #ecd9a8; color: #7a5408;
+  font-size: 13px; display: flex; gap: 10px; align-items: flex-start;
+}
+.notice.pii { background: var(--red-bg); border-color: #e9c2c6; color: #8a2c39; }
+.notice .ic { flex: none; font-size: 16px; line-height: 1.5; }
+
+/* ---- Legend ------------------------------------------------------------- */
+.legend { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 16px; font-size: 12px; align-items: center; }
+.legend .lab { color: var(--ink-500); }
+.pill {
+  display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px;
+  border-radius: 100px; font-size: 11.5px; font-weight: 500; border: 1px solid transparent;
+}
+.pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.pill.green  { color: var(--green);  background: var(--green-bg);  border-color: #c4e0d6; }
+.pill.amber  { color: var(--amber);  background: var(--amber-bg);  border-color: #ecd9a8; }
+.pill.red    { color: var(--red);    background: var(--red-bg);    border-color: #e9c2c6; }
+.pill.violet { color: var(--violet); background: var(--violet-bg); border-color: #d8cbef; }
+
+/* ---- Sticky program nav ------------------------------------------------- */
+.nav {
+  position: sticky; top: 0; z-index: 40;
+  background: rgba(250,248,244,.92); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--sand-200);
+  margin-top: 22px;
+}
+.nav-inner { max-width: var(--maxw); margin: 0 auto; padding: 10px 16px; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: thin; }
+.tab {
+  flex: none; cursor: pointer; border: 1px solid var(--sand-200); background: #fff;
+  border-radius: 100px; padding: 8px 15px; font-size: 13px; font-weight: 500; color: var(--ink-700);
+  display: flex; align-items: center; gap: 8px; transition: all .16s ease; white-space: nowrap;
+}
+.tab:hover { border-color: var(--snb-300, var(--snb-500)); color: var(--snb-700); }
+.tab.active { background: var(--snb-700); color: #fff; border-color: var(--snb-700); box-shadow: var(--shadow-md); }
+.tab .num { font-size: 11px; opacity: .8; }
+.tab .prog { font-size: 10.5px; padding: 1px 7px; border-radius: 100px; background: var(--sand-100); color: var(--ink-500); }
+.tab.active .prog { background: rgba(255,255,255,.2); color: #fff; }
+.tab .warn { color: var(--amber); font-size: 13px; }
+.tab.active .warn { color: #ffd87a; }
+
+/* ---- Save bar ----------------------------------------------------------- */
+.savebar {
+  max-width: var(--maxw); margin: 16px auto 0; padding: 0 22px;
+  display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;
+}
+.save-state { display: flex; align-items: center; gap: 9px; font-size: 13px; color: var(--ink-500); }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-300); transition: background .2s; }
+.dot.saved { background: var(--green); }
+.dot.dirty { background: var(--amber); }
+.actions { display: flex; flex-wrap: wrap; gap: 9px; }
+.btn {
+  cursor: pointer; border: 1px solid var(--sand-300); background: #fff; color: var(--ink-900);
+  border-radius: var(--radius-sm); padding: 9px 15px; font-size: 13px; font-weight: 500;
+  display: inline-flex; align-items: center; gap: 7px; transition: all .14s ease;
+}
+.btn:hover { border-color: var(--snb-500); box-shadow: var(--shadow-sm); }
+.btn.primary { background: var(--snb-700); color: #fff; border-color: var(--snb-700); }
+.btn.primary:hover { background: var(--snb-800); }
+.btn.danger { color: var(--red); border-color: #e9c2c6; background: #fff; }
+.btn.danger:hover { background: var(--red-bg); }
+
+/* ---- Program section ---------------------------------------------------- */
+main { max-width: var(--maxw); margin: 22px auto 80px; padding: 0 22px; }
+.program { display: none; animation: fade .25s ease; }
+.program.active { display: block; }
+@keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.prog-head { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 14px; justify-content: space-between; margin-bottom: 6px; }
+.prog-head h2 { font-size: 22px; color: var(--snb-900); display: flex; align-items: center; gap: 10px; }
+.prog-head .idx {
+  font-size: 13px; background: var(--snb-700); color: #fff; width: 30px; height: 30px;
+  border-radius: 8px; display: grid; place-items: center; font-weight: 600; flex: none;
+}
+.prog-progress { min-width: 200px; }
+.prog-progress .barwrap { height: 8px; background: var(--sand-200); border-radius: 100px; overflow: hidden; }
+.prog-progress .bar { height: 100%; background: linear-gradient(90deg, var(--snb-600), var(--snb-500)); width: 0; transition: width .3s ease; }
+.prog-progress .lbl { font-size: 12px; color: var(--ink-500); margin-bottom: 5px; display: flex; justify-content: space-between; }
+.prog-note {
+  background: var(--snb-050); border: 1px solid var(--snb-100); border-right: 3px solid var(--snb-500);
+  border-radius: var(--radius-sm); padding: 11px 14px; font-size: 13px; color: var(--ink-700); margin: 12px 0 22px;
+}
+.prog-banner {
+  background: var(--violet-bg); border: 1px solid #d8cbef; border-right: 3px solid var(--violet);
+  color: #4f3a7d; font-size: 13px; padding: 11px 14px; border-radius: var(--radius-sm); margin: 12px 0 22px;
+  display: flex; gap: 9px; align-items: flex-start;
+}
+
+/* ---- Stage block -------------------------------------------------------- */
+.stage { margin-bottom: 26px; }
+.stage-head {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+  font-size: 13px; font-weight: 600; color: var(--snb-800); text-transform: none;
+}
+.stage-head .chip {
+  background: var(--snb-700); color: #fff; padding: 3px 12px; border-radius: 100px; font-size: 12px;
+}
+.stage-head .rule { flex: 1; height: 1px; background: var(--sand-200); }
+
+/* ---- Item card ---------------------------------------------------------- */
+.item {
+  background: #fff; border: 1px solid var(--sand-200); border-radius: var(--radius);
+  box-shadow: var(--shadow-sm); padding: 16px 18px; margin-bottom: 12px;
+}
+.item-top { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px 12px; }
+.item-label { font-size: 14.5px; font-weight: 500; color: var(--ink-900); flex: 1; min-width: 220px; line-height: 1.55; }
+.item-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.tag {
+  font-size: 11px; color: var(--ink-500); background: var(--sand-100); border: 1px solid var(--sand-200);
+  padding: 2px 9px; border-radius: 100px;
+}
+.tag.shape { color: var(--snb-700); background: var(--snb-050); border-color: var(--snb-100); font-weight: 500; }
+.item-hint { font-size: 12px; color: var(--ink-500); margin-top: 7px; }
+.unrev-flag {
+  font-size: 11px; color: var(--violet); background: var(--violet-bg); border: 1px solid #d8cbef;
+  padding: 2px 9px; border-radius: 100px; font-weight: 500;
+}
+
+/* ---- Matrix grid -------------------------------------------------------- */
+.matrix { margin-top: 13px; overflow-x: auto; }
+.matrix table { border-collapse: collapse; width: 100%; min-width: 340px; }
+.matrix th, .matrix td { border: 1px solid var(--sand-200); padding: 0; text-align: center; }
+.matrix th {
+  background: var(--sand-100); font-size: 12.5px; font-weight: 600; color: var(--snb-800);
+  padding: 8px 6px; font-family: "IBM Plex Sans", var(--font-body);
+}
+.matrix th.ylabel { background: var(--snb-050); }
+.matrix td input {
+  width: 100%; border: none; background: transparent; text-align: center; padding: 10px 6px;
+  font-size: 14px; outline: none; min-width: 70px; font-family: "IBM Plex Sans", var(--font-body);
+}
+.matrix td { transition: background .12s; }
+.matrix td:focus-within { background: var(--snb-050); box-shadow: inset 0 0 0 2px var(--snb-500); }
+.matrix td input::placeholder { color: var(--ink-300); }
+
+/* ---- Document / PII rows ------------------------------------------------ */
+.doc-row, .pii-row { margin-top: 13px; display: grid; gap: 10px; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-size: 12px; color: var(--ink-500); font-weight: 500; }
+select, .txtin, textarea {
+  border: 1px solid var(--sand-300); background: #fff; border-radius: var(--radius-sm);
+  padding: 9px 11px; font-size: 13.5px; outline: none; transition: border .14s, box-shadow .14s; width: 100%;
+}
+select:focus, .txtin:focus, textarea:focus { border-color: var(--snb-500); box-shadow: 0 0 0 3px var(--snb-050); }
+textarea { resize: vertical; min-height: 44px; }
+.doc-grid { display: grid; grid-template-columns: minmax(180px,1fr) 1.4fr; gap: 12px; }
+.pii-grid { display: grid; grid-template-columns: minmax(180px,1fr) 130px 1.2fr; gap: 12px; }
+.count-in { text-align: center; }
+@media (max-width: 640px) {
+  .doc-grid, .pii-grid { grid-template-columns: 1fr; }
+}
+
+/* ---- Footer ------------------------------------------------------------- */
+footer { border-top: 1px solid var(--sand-200); background: var(--sand-100); padding: 22px 0; margin-top: 40px; }
+footer .wrap { font-size: 12.5px; color: var(--ink-500); display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: space-between; }
+footer b { color: var(--ink-700); font-weight: 500; }
+
+/* ---- Toast -------------------------------------------------------------- */
+.toast {
+  position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--snb-900); color: #fff; padding: 11px 20px; border-radius: 100px; font-size: 13px;
+  box-shadow: var(--shadow-lg); opacity: 0; pointer-events: none; transition: all .25s ease; z-index: 90;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* file input hidden */
+#importFile, #importJson { display: none; }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="brandline">
+      <div class="crest">SNB</div>
+      <div class="org">
+        <div>البنك الأهلي السعودي · <b>إدارة المسؤولية المجتمعية</b></div>
+        <div>برامج «أهالينا» — مشروع قياس الأثر</div>
+      </div>
+    </div>
+    <h1 id="docTitle">سجل بيانات برامج خدمة المجتمع</h1>
+    <p class="sub" id="docSub"></p>
+    <div class="metabar" id="metaBar"></div>
+  </div>
+</header>
+
+<section class="intro">
+  <div class="intro-card">
+    <h2>📋 عن هذا النموذج</h2>
+    <p style="font-size:13.5px;color:var(--ink-700);margin:0;">
+      هذا نموذج لجمع بيانات السجلات الخاصة ببرامج المسؤولية المجتمعية. يمكنك تعبئته على مراحل دون قلق —
+      تُحفَظ إجاباتك تلقائياً في هذا المتصفح. عند الانتهاء (أو في أي وقت) صدِّر البيانات إلى ملف Excel وأرسله لفريق قرارات.
+    </p>
+
+    <div class="intro-grid">
+      <div class="howto"><div class="ic">💾</div><h3>الحفظ والمتابعة</h3><p>يُحفَظ كل إدخال تلقائياً في هذا الجهاز. أغلِق الصفحة وعُد لاحقاً وستجد بياناتك.</p></div>
+      <div class="howto"><div class="ic">📊</div><h3>التصدير إلى Excel</h3><p>زر «تصدير إلى Excel» يُنشئ ملفاً بورقة لكل برنامج — هو الملف الذي تُرسله لنا.</p></div>
+      <div class="howto"><div class="ic">🔄</div><h3>المتابعة عبر الأجهزة</h3><p>للانتقال بين الأجهزة، احفظ «نسخة JSON» وحمّلها على الجهاز الآخر لاستئناف العمل.</p></div>
+      <div class="howto"><div class="ic">📎</div><h3>المستندات</h3><p>المستندات لا تُرفَع هنا — حدِّد حالتها فقط، وأرسل الملفات نفسها بالبريد بشكل منفصل.</p></div>
+    </div>
+
+    <div class="notice pii">
+      <span class="ic">🔒</span>
+      <div><b>تنبيه خصوصية مهم:</b> قوائم المستفيدين (الأسماء والجوالات والبريد) <b>لا تُدخَل في هذا النموذج إطلاقاً</b> —
+      هذه الصفحة عامة. أدخِل حالة القائمة وعدد الأشخاص فقط، وأرسل القائمة نفسها بشكل منفصل وآمن.</div>
+    </div>
+
+    <div class="legend">
+      <span class="lab">حالة توافر البند:</span>
+      <span class="pill green">متوفر الآن</span>
+      <span class="pill amber">يحتاج جلب</span>
+      <span class="pill red">يحتاج إذن / إحالة</span>
+      <span class="pill violet">غير مُراجَع</span>
+    </div>
+  </div>
+</section>
+
+<nav class="nav"><div class="nav-inner" id="tabNav"></div></nav>
+
+<div class="savebar">
+  <div class="save-state"><span class="dot" id="saveDot"></span><span id="saveText">جاهز</span></div>
+  <div class="actions">
+    <button class="btn primary" id="btnExport">⬇ تصدير إلى Excel</button>
+    <button class="btn" id="btnSaveJson">💾 حفظ نسخة (JSON)</button>
+    <button class="btn" id="btnLoadJson">📂 تحميل نسخة (JSON)</button>
+    <button class="btn danger" id="btnClear">🗑 مسح الكل</button>
+    <input type="file" id="importJson" accept=".json" />
+  </div>
+</div>
+
+<main id="programs"></main>
+
+<footer>
+  <div class="wrap">
+    <span>أُعدّ بواسطة <b>قرارات (Qararat AI)</b> — رئاسة قياس الأثر · للبنك الأهلي السعودي</span>
+    <span id="footMeta"></span>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<!-- SheetJS for xlsx export -->
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
