@@ -34,7 +34,6 @@ AVAIL_LABEL = {
     "available": "متوفر الآن ✓",
     "fetch": "يحتاج جلب",
     "permission": "يحتاج إذن / إحالة",
-    "unreviewed": "⚠ غير مُراجَع",
 }
 STAGES = ["مدخلات", "أنشطة", "مخرجات", "نتائج", "أثر"]
 
@@ -100,10 +99,6 @@ def build():
         r += 1
         ws.cell(r, 1, "السنوات: " + " – ".join(str(y) for y in p["years"])).font = meta_font
         r += 1
-        if p.get("unreviewed"):
-            c = ws.cell(r, 1, "⚠ غير مُراجَع مع العميل — مبني من المنهجية (ن3)")
-            c.font = warn_font
-            r += 1
         ws.cell(r, 1, p.get("note", "")).font = meta_font
         ws.cell(r, 1).alignment = right
         r += 2
@@ -137,14 +132,11 @@ def build():
                         vals.append("—" if it["shape"] == "matrix" else "")
                 # status / count / notes (blank for client to fill)
                 vals += ["", "", ""]
-                row_fill = UNREV_FILL if it.get("unreviewed") else None
                 for ci, v in enumerate(vals, start=1):
                     c = ws.cell(r, ci, v)
                     c.font = cell_font
                     c.border = BORDER
                     c.alignment = right if ci in (1, 2, 5) else center
-                    if row_fill and ci <= 5:
-                        c.fill = PatternFill("solid", fgColor=row_fill)
                 r += 1
 
         # column widths

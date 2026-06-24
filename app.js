@@ -59,7 +59,6 @@
       t.innerHTML =
         '<span class="num lat">' + (i + 1) + '</span>' +
         '<span>' + p.name + '</span>' +
-        (p.unreviewed ? '<span class="warn" title="غير مُراجَع">⚠</span>' : '') +
         '<span class="prog" id="tabprog_' + p.id + '">0%</span>';
       t.addEventListener("click", function () { showProgram(p.id); });
       nav.appendChild(t);
@@ -91,7 +90,6 @@
     html += '<div class="item-meta">';
     html += '<span class="tag shape">' + SHAPE_LABEL[item.shape] + '</span>';
     html += '<span class="pill ' + avail.tone + '">' + esc(avail.label) + '</span>';
-    if (item.unreviewed) html += '<span class="unrev-flag">⚠ غير مُراجَع</span>';
     html += '</div></div>';
     if (item.source) html += '<div class="item-hint">المصدر / المالك: ' + esc(item.source) + (item.notes ? ' — ' + esc(item.notes) : '') + '</div>';
     else if (item.notes) html += '<div class="item-hint">' + esc(item.notes) + '</div>';
@@ -173,10 +171,6 @@
            '<div class="barwrap"><div class="bar" id="bar_' + p.id + '"></div></div></div>';
       h += '</div>';
 
-      if (p.unreviewed)
-        h += '<div class="prog-banner"><span>⚠</span><div>هذا البرنامج <b>لم يُراجَع مع العميل بعد</b> — البنود مبنية من المنهجية (ن3). ' +
-             'يمكنك تعبئتها، وستُراجَع الصياغة والتوافر لاحقاً.</div></div>';
-
       h += '<div class="prog-note">' + esc(p.note) + '</div>';
 
       // group by stage in canonical order
@@ -247,7 +241,6 @@
     var rows = [];
     rows.push(["البرنامج:", p.name]);
     rows.push(["السنوات:", p.years.join(" – ")]);
-    if (p.unreviewed) rows.push(["تنبيه:", "غير مُراجَع مع العميل — مبني من المنهجية (ن3)"]);
     rows.push([]);
 
     var maxYears = p.years.slice();
