@@ -105,7 +105,7 @@ const REGISTER = {
         { id: "p1_i12", stage: "أنشطة", shape: "matrix", label: "نسبة إكمال الدورة (Retention) (%)", source: "الجمعية", status: "available", notes: "" },
         { id: "p1_i13", stage: "أنشطة", shape: "matrix", label: "رضا المستفيدات عن التدريب (النتيجة سنوياً)", source: "الجمعية", status: "available", notes: "استبيان بعد كل دورة موجود؛ تُستخرَج النتيجة سنوياً (الفورم يُرفق كوثيقة أدناه)." },
         { id: "p1_i14", stage: "أنشطة", shape: "document", label: "نموذج استبيان الرضا (الكوسينير) بعد الدورة", source: "الجمعية", status: "available", notes: "يُرفق الفورم كاملاً." },
-        { id: "p1_i16", stage: "أنشطة", shape: "matrix", label: "عدد طلبات الالتحاق المستلمة", source: "الجمعية", status: "fetch", notes: "مثال: 100 قدّموا، 50 قُبلوا." },
+        { id: "p1_i16", stage: "أنشطة", shape: "matrix", label: "عدد طلبات الالتحاق المستلمة", source: "الجمعية", status: "fetch", notes: "مثال: 100 قدّموا، 50 قُبلوا. (يُجمع من سجلات الجمعيات المنفّذة عند توفّرها)" },
         { id: "p1_i29", stage: "أنشطة", shape: "matrix", label: "عدد المقبولات (لكل سنة)", source: "الجمعية", status: "fetch", notes: "العدد الخام للمقبولات؛ يحسب فريق قرارات معدل القبول من الطلبات والمقبولات." },
         { id: "p1_i30", stage: "أنشطة", shape: "matrix", label: "عدد المستفيدات من الفئات الأولى بالرعاية (لكل سنة)", source: "الجمعية", status: "available", notes: "العدد الخام؛ مسجَّلات مستفيدات في الجمعية (دخل محدود + دراسة حالة). الإجمالي محسوب من عدد المتدربات." },
 
@@ -142,6 +142,7 @@ const REGISTER = {
         { id: "p2_i13", stage: "مخرجات", shape: "matrix", label: "عدد المستفيدين (ذكور) (لكل سنة)", source: "الوزارة", status: "available", notes: "التوزيع حسب الجنس — العدد الخام للذكور لكل سنة." },
         { id: "p2_i14", stage: "مخرجات", shape: "matrix", label: "عدد المستفيدات (إناث) (لكل سنة)", source: "الوزارة", status: "available", notes: "التوزيع حسب الجنس — العدد الخام للإناث لكل سنة." },
 
+        { id: "p2_i05", stage: "نتائج", shape: "matrix", label: "متوسط الإيجار الشهري قبل البرنامج (لكل سنة)", source: "الوزارة → البنك / المستفيد", status: "fetch", notes: "الرقم الخام لكل سنة؛ خط الأساس لأثر الاستقرار السكني." },
         { id: "p2_pii1", stage: "نتائج", shape: "pii", label: "قائمة الأسر المستفيدة (اسم + جوال + مدينة + عدد أفراد الأسرة)", source: "الوزارة → (بإذن) البنك", status: "permission", notes: "شرط قياس الأثر كله؛ معلّق على إذن الوزارة." }
       ]
     },
@@ -176,7 +177,7 @@ const REGISTER = {
 
         { id: "p3_i14", stage: "نتائج", shape: "matrix", label: "كمية المياه الرمادية المعالجة (لكل سنة)", source: "البنك / الوزارة", status: "fetch", notes: "أُعيدت صياغته من «نسبة توفير المياه». الكمية الخام لكل سنة؛ يحسب فريق قرارات التراكمي. الهدف معالجة لا توفير." },
         { id: "p3_i15", stage: "نتائج", shape: "matrix", label: "عدد المساجد ذات الأنظمة العاملة", source: "البنك / الوزارة", status: "available", notes: "" },
-        { id: "p3_i16", stage: "نتائج", shape: "document", label: "تقييم الشركاء لأثر البرنامج البيئي", source: "وزارة البيئة (الشريك)", status: "permission", notes: "الشركاء = وزارة البيئة؛ البنك يرسل كونتاكتهم." },
+        { id: "p3_i27", stage: "نتائج", shape: "document", label: "تقييم الوزارة/الشركاء لرضا المجتمع عن المبادرات البيئية (%)", source: "وزارة البيئة (الشريك)", status: "permission", notes: "نسبة مُقدَّمة من الوزارة/الشريك كسجل (لا استبيان نُجريه). البنك يرسل كونتاكت الوزارة." },
         { id: "p3_i17", stage: "نتائج", shape: "matrix", label: "معدل بقاء الأشجار في المواقع (%)", source: "وزارة البيئة", status: "permission", notes: "program-supplied عبر الوزارة (سجل مُقدَّم من الوزارة)." },
         { id: "p3_i26", stage: "نتائج", shape: "matrix", label: "معدل بقاء الأشجار في المساجد (%)", source: "وزارة البيئة", status: "permission", notes: "program-supplied عبر الوزارة (سجل مُقدَّم من الوزارة)." },
 
@@ -295,26 +296,27 @@ const REGISTER = {
       note: "المصدر: ملفات v4 (خارج ن3). المنفّذ: شركة ركين (منصة RCAT). الفوج: 55 جمعية، مكة، يوليو–ديسمبر 2026 (تمكين 40 + تعظيم أثر 15). هذا التبويب على v4 وقد يُحدَّث لاحقاً بقرار المالك.",
       unreviewed: false,
       items: [
-        { id: "p7_i01", stage: "مدخلات", shape: "matrix", label: "الميزانية السنوية المخصصة", source: "البنك", status: "available", notes: "1,414,686 ريال (بدون ضريبة)." },
-        { id: "p7_i19", stage: "مدخلات", shape: "matrix", label: "المبلغ المصروف من الميزانية (2026)", source: "البنك / ركين", status: "available", notes: "المبلغ الخام المصروف؛ يحسب فريق قرارات نسبة الصرف من المخصص." },
-        { id: "p7_i03", stage: "مدخلات", shape: "matrix", label: "عدد مستشاري ركين المشاركين", source: "ركين", status: "available", notes: "" },
-        { id: "p7_i05", stage: "مدخلات", shape: "matrix", label: "عدد الشراكات الفعّالة (المركز الوطني والوحدات الإشرافية)", source: "البنك / ركين", status: "available", notes: "" },
+        { id: "p7_i01", stage: "مدخلات", shape: "matrix",   label: "الميزانية السنوية المخصصة", source: "البنك", status: "available", notes: "1,414,686 ريال (بدون ضريبة) / 1,626,889 شاملة الضريبة." },
+        { id: "p7_i02", stage: "مدخلات", shape: "matrix",   label: "المبلغ المصروف من الميزانية (2026)", source: "البنك / ركين", status: "available", notes: "المبلغ الخام المصروف؛ يحسب فريق قرارات نسبة الصرف من المخصص (Rule B — لا تُدخل النسبة)." },
+        { id: "p7_i03", stage: "مدخلات", shape: "matrix",   label: "عدد مستشاري ركين المشاركين", source: "ركين", status: "available", notes: "" },
+        { id: "p7_i04", stage: "مدخلات", shape: "document", label: "جاهزية منصة التقييم RCAT وأدوات التأهيل", source: "ركين", status: "available", notes: "منصة RCAT — تقييم ذاتي بمسطرة رباعية ثم مراجعة مستشار. يُرفق وصف الجاهزية بالبريد." },
+        { id: "p7_i05", stage: "مدخلات", shape: "matrix",   label: "عدد الشراكات الفعّالة (المركز الوطني والوحدات الإشرافية)", source: "البنك / ركين", status: "available", notes: "" },
 
-        { id: "p7_i06", stage: "أنشطة", shape: "matrix", label: "عدد الجمعيات التي خضعت لتقييم الجاهزية", source: "ركين", status: "available", notes: "" },
-        { id: "p7_i07", stage: "أنشطة", shape: "matrix", label: "عدد ورش العمل الحضورية المنفّذة", source: "ركين", status: "available", notes: "6 ورش." },
-        { id: "p7_i08", stage: "أنشطة", shape: "matrix", label: "عدد منسوبي الجمعيات المشاركين في الورش", source: "ركين", status: "available", notes: "" },
-        { id: "p7_i09", stage: "أنشطة", shape: "matrix", label: "رضا المشاركين عن ورش العمل (%)", source: "ركين (استبيان)", status: "available", notes: "self-reported." },
-        { id: "p7_i10", stage: "أنشطة", shape: "matrix", label: "عدد اللقاءات المعرفية المنفّذة", source: "ركين", status: "available", notes: "3 لقاءات." },
-        { id: "p7_i11", stage: "أنشطة", shape: "matrix", label: "عدد الزيارات الميدانية والجلسات الاستشارية المنفّذة", source: "ركين", status: "available", notes: "3 جلسات/جمعية، 20 ساعة لمسار التعظيم." },
+        { id: "p7_i06", stage: "أنشطة", shape: "matrix",   label: "عدد الجمعيات التي خضعت لتقييم الجاهزية", source: "ركين", status: "available", notes: "55 جمعية مستهدفة (مكة، يوليو–ديسمبر 2026)." },
+        { id: "p7_i07", stage: "أنشطة", shape: "matrix",   label: "عدد ورش العمل الحضورية المنفّذة", source: "ركين", status: "available", notes: "6 ورش (مكة في ن4)." },
+        { id: "p7_i08", stage: "أنشطة", shape: "matrix",   label: "عدد منسوبي الجمعيات المشاركين في الورش", source: "ركين", status: "available", notes: "" },
+        { id: "p7_i10", stage: "أنشطة", shape: "matrix",   label: "عدد اللقاءات المعرفية المنفّذة", source: "ركين", status: "available", notes: "3 لقاءات عن بُعد." },
+        { id: "p7_i11", stage: "أنشطة", shape: "matrix",   label: "عدد الزيارات الميدانية والجلسات الاستشارية المنفّذة", source: "ركين", status: "available", notes: "3 جلسات/جمعية؛ 20 ساعة استشارية لمسار التعظيم." },
 
-        { id: "p7_i20", stage: "مخرجات", shape: "matrix", label: "عدد الجمعيات المؤهَّلة — مسار تمكين (2026)", source: "ركين", status: "available", notes: "تمكين 40." },
-        { id: "p7_i21", stage: "مخرجات", shape: "matrix", label: "عدد الجمعيات المؤهَّلة — مسار تعظيم أثر (2026)", source: "ركين", status: "available", notes: "تعظيم 15." },
-        { id: "p7_i13", stage: "مخرجات", shape: "matrix", label: "عدد تقارير تقييم الجاهزية الصادرة", source: "ركين", status: "available", notes: "" },
-        { id: "p7_i14", stage: "مخرجات", shape: "matrix", label: "عدد خطط تفعيل المنافسات الحكومية المُعدّة", source: "ركين", status: "available", notes: "" },
+        { id: "p7_i20", stage: "مخرجات", shape: "matrix",  label: "عدد الجمعيات المؤهَّلة — مسار تمكين (2026)", source: "ركين", status: "available", notes: "تمكين 40." },
+        { id: "p7_i21", stage: "مخرجات", shape: "matrix",  label: "عدد الجمعيات المؤهَّلة — مسار تعظيم أثر (2026)", source: "ركين", status: "available", notes: "تعظيم 15." },
+        { id: "p7_i13", stage: "مخرجات", shape: "matrix",  label: "عدد تقارير تقييم الجاهزية الصادرة", source: "ركين", status: "available", notes: "" },
+        { id: "p7_i14", stage: "مخرجات", shape: "matrix",  label: "عدد خطط تفعيل المنافسات الحكومية المُعدّة", source: "ركين", status: "available", notes: "مسار التعظيم." },
 
-        { id: "p7_i15", stage: "نتائج", shape: "matrix", label: "درجة جاهزية الإسناد (RCAT دخول/خروج)", source: "ركين", status: "available", notes: "سجل (لا استبيان) — ناتج RCAT موثَّق." },
-        { id: "p7_i17", stage: "أثر", shape: "matrix", label: "عدد الجمعيات التي تقدّمت على فرص إسناد حكومية", source: "ركين", status: "fetch", notes: "يُؤكَّد مع المالك أن ركين تتعقّب التقدّم كسجل." },
-        { id: "p7_i18", stage: "أثر", shape: "matrix", label: "عدد الجمعيات التي فازت بعقود إسناد حكومية", source: "ركين", status: "fetch", notes: "مقياس النجاح الجوهري؛ متابعة أثر طويل المدى." }
+        { id: "p7_i15", stage: "نتائج", shape: "matrix",   label: "درجة جاهزية الإسناد (تقييم RCAT دخول/خروج)", source: "ركين", status: "available", notes: "سجل — ناتج RCAT الموثَّق (دخول/خروج)، لا استبيان ذاتي." },
+
+        { id: "p7_i17", stage: "أثر", shape: "matrix",     label: "عدد الجمعيات التي تقدّمت على فرص إسناد حكومية", source: "ركين", status: "fetch", notes: "يُؤكَّد مع المالك أن ركين تتعقّب التقدّم كسجل." },
+        { id: "p7_i18", stage: "أثر", shape: "matrix",     label: "عدد الجمعيات التي فازت بعقود إسناد حكومية", source: "ركين", status: "fetch", notes: "مقياس النجاح الجوهري؛ متابعة أثر طويل المدى — رؤية 2030." }
       ]
     }
   ]
