@@ -103,7 +103,7 @@ const REGISTER = {
         { id: "p1_i10", stage: "أنشطة", shape: "matrix", label: "عدد الدورات المنفذة سنوياً", source: "الجمعية", status: "available", notes: "" },
         { id: "p1_i11", stage: "أنشطة", shape: "matrix", label: "عدد ساعات التدريب الإجمالية", source: "الجمعية", status: "available", notes: "" },
         { id: "p1_i12", stage: "أنشطة", shape: "matrix", label: "نسبة إكمال الدورة (Retention) (%)", source: "الجمعية", status: "available", notes: "" },
-        { id: "p1_i13", stage: "أنشطة", shape: "matrix", label: "رضا المستفيدات عن التدريب (النتيجة سنوياً)", source: "الجمعية", status: "available", notes: "استبيان بعد كل دورة موجود؛ تُستخرَج النتيجة سنوياً (الفورم يُرفق كوثيقة أدناه)." },
+        { id: "p1_i13", stage: "أنشطة", shape: "document", label: "نتائج استبيان رضا المستفيدات عن التدريب (السجل لدى العميل)", source: "الجمعية", status: "available", notes: "نتائج الاستبيان الموجودة أصلاً لدى العميل تُرسَل كما هي (لا نُجري استبياناً جديداً). أرفِق ملخّص/مخرجات الرضا المتوفرة." },
         { id: "p1_i14", stage: "أنشطة", shape: "document", label: "نموذج استبيان الرضا (الكوسينير) بعد الدورة", source: "الجمعية", status: "available", notes: "يُرفق الفورم كاملاً." },
         { id: "p1_i16", stage: "أنشطة", shape: "matrix", label: "عدد طلبات الالتحاق المستلمة", source: "الجمعية", status: "fetch", notes: "مثال: 100 قدّموا، 50 قُبلوا. (يُجمع من سجلات الجمعيات المنفّذة عند توفّرها)" },
         { id: "p1_i29", stage: "أنشطة", shape: "matrix", label: "عدد المقبولات (لكل سنة)", source: "الجمعية", status: "fetch", notes: "العدد الخام للمقبولات؛ يحسب فريق قرارات معدل القبول من الطلبات والمقبولات." },

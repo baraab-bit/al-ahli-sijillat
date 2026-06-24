@@ -250,6 +250,21 @@ main { max-width: var(--maxw); margin: 22px auto 80px; padding: 0 22px; }
 .matrix td { transition: background .12s; }
 .matrix td:focus-within { background: var(--snb-050); box-shadow: inset 0 0 0 2px var(--snb-500); }
 .matrix td input::placeholder { color: var(--ink-300); }
+/* client-added year columns + add-year control */
+.matrix th.added-year { background: var(--snb-050); position: relative; white-space: nowrap; }
+.matrix th.added-year .yr-remove {
+  border: none; background: transparent; color: var(--ink-500); cursor: pointer;
+  font-size: 14px; line-height: 1; padding: 0 0 0 4px; margin-inline-start: 3px;
+  vertical-align: middle; font-family: var(--font-body);
+}
+.matrix th.added-year .yr-remove:hover { color: #c0392b; }
+.matrix th.add-year-cell, .matrix td.add-year-cell { border: none; background: transparent; padding: 0 6px; }
+.add-year-btn {
+  border: 1px dashed var(--snb-500); background: var(--snb-050); color: var(--snb-800);
+  border-radius: 6px; cursor: pointer; font-size: 11.5px; font-weight: 600;
+  padding: 5px 9px; white-space: nowrap; font-family: var(--font-body); transition: background .12s;
+}
+.add-year-btn:hover { background: var(--snb-100, var(--snb-050)); }
 
 /* ---- Document / PII rows ------------------------------------------------ */
 .doc-row, .pii-row { margin-top: 13px; display: grid; gap: 10px; }

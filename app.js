@@ -20,9 +20,31 @@
   function persist() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(answers)); } catch (e) {}
   }
-  function ans(id) { return answers[id] || (answers[id] = { cells: {}, status: "", count: "", notes: "" }); }
+  function ans(id) {
+    var a = answers[id] || (answers[id] = { cells: {}, status: "", count: "", notes: "" });
+    if (!a.cells) a.cells = {};
+    if (!a.addedYears) a.addedYears = [];
+    return a;
+  }
 
-  function itemYears(item, program) { return item.years || program.years || window.DEFAULT_YEARS; }
+  function baseYears(item, program) { return item.years || program.years || window.DEFAULT_YEARS; }
+
+  // All year columns for a matrix question = base years + client-added years (sorted, deduped)
+  function itemYears(item, program) {
+    var a = answers[item.id];
+    var added = (a && a.addedYears) ? a.addedYears : [];
+    var base = baseYears(item, program);
+    var all = base.slice();
+    added.forEach(function (y) { if (all.map(String).indexOf(String(y)) < 0) all.push(Number(y)); });
+    all.sort(function (x, y) { return Number(x) - Number(y); });
+    return all;
+  }
+
+  function isAddedYear(item, year) {
+    var a = answers[item.id];
+    if (!a || !a.addedYears) return false;
+    return a.addedYears.map(String).indexOf(String(year)) >= 0;
+  }
 
   // ---- save indicator ------------------------------------------------------
   function markDirty() {
@@ -106,12 +128,21 @@
   function renderMatrix(item, program, a) {
     var years = itemYears(item, program);
     var h = '<div class="matrix"><table><thead><tr><th class="ylabel">القيمة لكل سنة</th>';
-    years.forEach(function (y) { h += '<th class="lat">' + y + '</th>'; });
+    years.forEach(function (y) {
+      if (isAddedYear(item, y)) {
+        h += '<th class="lat added-year">' + y +
+             '<button type="button" class="yr-remove" data-remove-year="' + y + '" title="حذف هذه السنة">×</button></th>';
+      } else {
+        h += '<th class="lat">' + y + '</th>';
+      }
+    });
+    h += '<th class="add-year-cell"><button type="button" class="add-year-btn" data-add-year="1">+ أضف سنة</button></th>';
     h += '</tr></thead><tbody><tr><td style="background:var(--sand-050);font-size:12px;color:var(--ink-500)">أدخِل القيمة</td>';
     years.forEach(function (y) {
       var v = (a.cells && a.cells[y] != null) ? a.cells[y] : "";
       h += '<td><input type="text" inputmode="decimal" data-cell="' + y + '" value="' + esc(v) + '" placeholder="—" /></td>';
     });
+    h += '<td class="add-year-cell"></td>';
     h += '</tr></tbody></table></div>';
     return h;
   }
@@ -193,6 +224,70 @@
   function wireInputs() {
     $("#programs").addEventListener("input", onChange);
     $("#programs").addEventListener("change", onChange);
+    $("#programs").addEventListener("click", onMatrixYearClick);
+  }
+
+  // Find {item, program} by itemId across the register
+  function lookupItem(id) {
+    var programs = window.REGISTER.programs;
+    for (var i = 0; i < programs.length; i++) {
+      var items = programs[i].items;
+      for (var j = 0; j < items.length; j++) {
+        if (items[j].id === id) return { item: items[j], program: programs[i] };
+      }
+    }
+    return null;
+  }
+
+  // Re-render a single matrix question's table in place (keeps other DOM intact)
+  function rerenderMatrix(id) {
+    var ref = lookupItem(id);
+    if (!ref || ref.item.shape !== "matrix") return;
+    var card = document.querySelector('.item[data-item="' + id + '"]');
+    if (!card) return;
+    var wrap = card.querySelector(".matrix");
+    if (!wrap) return;
+    var a = ans(id);
+    var tmp = document.createElement("div");
+    tmp.innerHTML = renderMatrix(ref.item, ref.program, a);
+    wrap.replaceWith(tmp.firstChild);
+  }
+
+  function onMatrixYearClick(e) {
+    var addBtn = e.target.closest("[data-add-year]");
+    var remBtn = e.target.closest("[data-remove-year]");
+    if (!addBtn && !remBtn) return;
+    var card = e.target.closest(".item");
+    if (!card) return;
+    var id = card.dataset.item;
+    var ref = lookupItem(id);
+    if (!ref) return;
+    var a = ans(id);
+
+    if (addBtn) {
+      var existing = itemYears(ref.item, ref.program);
+      var maxYear = existing.length ? Math.max.apply(null, existing.map(Number)) : 2025;
+      var suggested = String(maxYear + 1);
+      var input = window.prompt("أدخِل السنة الجديدة (4 أرقام):", suggested);
+      if (input == null) return;
+      input = String(input).trim();
+      if (!/^\d{4}$/.test(input)) { toast("السنة يجب أن تكون 4 أرقام"); return; }
+      var yNum = Number(input);
+      if (existing.map(String).indexOf(input) >= 0) { toast("هذه السنة موجودة بالفعل"); return; }
+      a.addedYears.push(yNum);
+      if (a.cells[yNum] == null) a.cells[yNum] = ""; // persist column even when empty
+      rerenderMatrix(id);
+      markDirty();
+      return;
+    }
+
+    if (remBtn) {
+      var year = remBtn.getAttribute("data-remove-year");
+      a.addedYears = a.addedYears.filter(function (y) { return String(y) !== String(year); });
+      delete a.cells[year];
+      rerenderMatrix(id);
+      markDirty();
+    }
   }
   function onChange(e) {
     var el = e.target;
@@ -244,11 +339,16 @@
     rows.push([]);
 
     var maxYears = p.years.slice();
+    function addCol(y) { if (maxYears.map(String).indexOf(String(y)) < 0) maxYears.push(Number(y)); }
     // ensure any item-specific years present in columns
     p.items.forEach(function (it) {
-      if (it.shape === "matrix") (it.years || []).forEach(function (y) { if (maxYears.indexOf(y) < 0) maxYears.push(y); });
+      if (it.shape !== "matrix") return;
+      (it.years || []).forEach(addCol);
+      // client-added years (union across all matrix questions in this program)
+      var a = answers[it.id];
+      if (a && a.addedYears) a.addedYears.forEach(addCol);
     });
-    maxYears.sort(function (a, b) { return a - b; });
+    maxYears.sort(function (a, b) { return Number(a) - Number(b); });
 
     var header = ["المرحلة", "البند / المؤشر", "شكل البيان", "الحالة (التوافر)", "المصدر / المالك"];
     maxYears.forEach(function (y) { header.push(String(y)); });
@@ -260,9 +360,11 @@
         var a = answers[it.id] || { cells: {}, status: "", count: "", notes: "" };
         var avail = (window.AVAILABILITY[it.status] || {}).label || "";
         var row = [it.stage, it.label, SHAPE_LABEL[it.shape], avail, it.source || ""];
-        var yrs = itemYears(it, p);
+        var yrs = itemYears(it, p).map(String);
+        var cells = a.cells || {};
         maxYears.forEach(function (y) {
-          row.push((it.shape === "matrix" && yrs.indexOf(y) >= 0 && a.cells[y] != null) ? a.cells[y] : "");
+          var key = String(y);
+          row.push((it.shape === "matrix" && yrs.indexOf(key) >= 0 && cells[key] != null) ? cells[key] : "");
         });
         // status/count/notes columns
         var statusText = "";
