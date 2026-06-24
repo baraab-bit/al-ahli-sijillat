@@ -69,6 +69,8 @@ gh api -X POST repos/baraab-bit/al-ahli-sijillat/pages -f 'source[branch]=main' 
 # الرابط: https://baraab-bit.github.io/al-ahli-sijillat/
 ```
 
+> **مهم — إبطال الكاش:** قبل كل نشر يغيّر `data.js` أو `app.js`، زِد رمز الإصدار `?v=` في `index.html` (مثال: `?v=20260624-1` ← `?v=20260624-2`). يخدم GitHub Pages هذه الملفات بـ `max-age=600`، فبدون زيادة الرمز قد يظل بناء قديم ظاهراً ~10 دقائق.
+
 ---
 
 **أُعدّ بواسطة:** قرارات (Qararat AI) · للبنك الأهلي السعودي · 2026-06-24

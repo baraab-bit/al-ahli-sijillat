@@ -369,7 +369,8 @@ footer b { color: var(--ink-700); font-weight: 500; }
 
 <!-- SheetJS for xlsx export -->
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="data.js"></script>
-<script src="app.js"></script>
+<!-- CACHE-BUSTING: bump the ?v= token (date+counter) on EVERY deploy that changes data.js or app.js — GitHub Pages serves these with max-age=600, so a stale build can linger ~10min without it. -->
+<script src="data.js?v=20260624-1"></script>
+<script src="app.js?v=20260624-1"></script>
 </body>
 </html>
