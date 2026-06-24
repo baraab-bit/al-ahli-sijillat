@@ -154,7 +154,7 @@ const REGISTER = {
       id: "p3_environment",
       name: "المبادرات البيئية",
       years: [2022, 2023, 2024, 2025],
-      note: "السنوات مفترَضة 2022–2025 (يُؤكَّد). المساجد لا كونتاكت لها؛ الشركاء = وزارة البيئة. الفوت برنت يبدأ من السنة القادمة.",
+      note: "السنوات مفترَضة 2022–2025 (يُؤكَّد). المساجد لا كونتاكت لها؛ الشركاء = وزارة البيئة.",
       unreviewed: false,
       items: [
         { id: "p3_i01", stage: "مدخلات", shape: "matrix", label: "الميزانية السنوية المخصصة", source: "البنك", status: "available", notes: "" },
@@ -179,9 +179,7 @@ const REGISTER = {
         { id: "p3_i15", stage: "نتائج", shape: "matrix", label: "عدد المساجد ذات الأنظمة العاملة", source: "البنك / الوزارة", status: "available", notes: "" },
         { id: "p3_i27", stage: "نتائج", shape: "document", label: "تقييم الوزارة/الشركاء لرضا المجتمع عن المبادرات البيئية (%)", source: "وزارة البيئة (الشريك)", status: "permission", notes: "نسبة مُقدَّمة من الوزارة/الشريك كسجل (لا استبيان نُجريه). البنك يرسل كونتاكت الوزارة." },
         { id: "p3_i17", stage: "نتائج", shape: "matrix", label: "معدل بقاء الأشجار في المواقع (%)", source: "وزارة البيئة", status: "permission", notes: "program-supplied عبر الوزارة (سجل مُقدَّم من الوزارة)." },
-        { id: "p3_i26", stage: "نتائج", shape: "matrix", label: "معدل بقاء الأشجار في المساجد (%)", source: "وزارة البيئة", status: "permission", notes: "program-supplied عبر الوزارة (سجل مُقدَّم من الوزارة)." },
-
-        { id: "p3_i19", stage: "أثر", shape: "matrix", label: "الفوت برنت / نسبة الخفض الكربوني (مانجروف وغيره)", years: [2026, 2027, 2028, 2029], source: "البنك / الوزارة", status: "fetch", notes: "يبدأ من السنة القادمة؛ لم يُعتمَد بعد لدى الوزارة." }
+        { id: "p3_i26", stage: "نتائج", shape: "matrix", label: "معدل بقاء الأشجار في المساجد (%)", source: "وزارة البيئة", status: "permission", notes: "program-supplied عبر الوزارة (سجل مُقدَّم من الوزارة)." }
       ]
     },
 
