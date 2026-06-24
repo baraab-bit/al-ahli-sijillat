@@ -1,6 +1,6 @@
 /* ============================================================================
  * app.js — render the form from REGISTER, autosave to localStorage,
- *          export/import xlsx + JSON. No backend; fully static.
+ *          export to xlsx. No backend; fully static.
  * ========================================================================== */
 (function () {
   "use strict";
@@ -79,7 +79,7 @@
     });
   }
 
-  var SHAPE_LABEL = { matrix: "مصفوفة سنوات", document: "وثيقة مرفقة", pii: "قائمة مستفيدين (PII)" };
+  var SHAPE_LABEL = { matrix: "مصفوفة سنوات", document: "وثيقة مرفقة", pii: "قائمة مستفيدين (PII)", select: "حالة (اختيار)" };
 
   // ---- render one item -----------------------------------------------------
   function renderItem(item, program) {
@@ -98,6 +98,7 @@
 
     if (item.shape === "matrix") html += renderMatrix(item, program, a);
     else if (item.shape === "document") html += renderDocument(item, a);
+    else if (item.shape === "select") html += renderSelect(item, a);
     else if (item.shape === "pii") html += renderPii(item, a);
 
     html += '</div>';
@@ -129,6 +130,15 @@
       '<select data-field="status">' + optionsHtml(window.DOC_STATUS_OPTIONS, a.status) + '</select></div>' +
       '<div class="field"><label>ملاحظات (اسم الملف / تفاصيل الإرسال)</label>' +
       '<input class="txtin" data-field="notes" value="' + esc(a.notes) + '" placeholder="مثال: سيُرسَل بالبريد بصيغة PDF" /></div>' +
+      '</div></div>';
+  }
+
+  function renderSelect(item, a) {
+    return '<div class="doc-row"><div class="doc-grid">' +
+      '<div class="field"><label>حالة الشراكة / الاتفاقية</label>' +
+      '<select data-field="status">' + optionsHtml(window.PARTNERSHIP_STATUS_OPTIONS, a.status) + '</select></div>' +
+      '<div class="field"><label>ملاحظات (المستند المرفق / تفاصيل)</label>' +
+      '<input class="txtin" data-field="notes" value="' + esc(a.notes) + '" placeholder="مثال: مذكرة التفاهم تُرسَل بالبريد" /></div>' +
       '</div></div>';
   }
 
@@ -264,6 +274,7 @@
         // status/count/notes columns
         var statusText = "";
         if (it.shape === "document") statusText = labelFor(window.DOC_STATUS_OPTIONS, a.status);
+        else if (it.shape === "select") statusText = labelFor(window.PARTNERSHIP_STATUS_OPTIONS, a.status);
         else if (it.shape === "pii") statusText = labelFor(window.PII_STATUS_OPTIONS, a.status);
         row.push(statusText, a.count || "", a.notes || "");
         rows.push(row);
@@ -294,31 +305,6 @@
     var stamp = new Date().toISOString().slice(0, 10);
     XLSX.writeFile(wb, "سجل-البنك-الأهلي-" + stamp + ".xlsx");
     toast("تم تصدير ملف Excel ✓");
-  }
-
-  // ---- JSON round-trip -----------------------------------------------------
-  function saveJson() {
-    var blob = new Blob([JSON.stringify({ _format: STORAGE_KEY, savedAt: new Date().toISOString(), answers: answers }, null, 2)],
-      { type: "application/json" });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement("a");
-    a.href = url; a.download = "سجل-البنك-الأهلي-نسخة-" + new Date().toISOString().slice(0, 10) + ".json";
-    a.click(); URL.revokeObjectURL(url);
-    toast("تم حفظ نسخة JSON ✓");
-  }
-  function loadJson(file) {
-    var reader = new FileReader();
-    reader.onload = function () {
-      try {
-        var data = JSON.parse(reader.result);
-        var incoming = data.answers || data;
-        if (typeof incoming !== "object") throw new Error("bad");
-        answers = incoming; persist();
-        rerenderValues();
-        toast("تم تحميل النسخة واستئناف العمل ✓");
-      } catch (e) { toast("تعذّر قراءة الملف — تأكد أنه نسخة JSON صحيحة"); }
-    };
-    reader.readAsText(file);
   }
 
   function rerenderValues() {
@@ -354,9 +340,6 @@
     rerenderValues();
 
     $("#btnExport").addEventListener("click", exportXlsx);
-    $("#btnSaveJson").addEventListener("click", saveJson);
-    $("#btnLoadJson").addEventListener("click", function () { $("#importJson").click(); });
-    $("#importJson").addEventListener("change", function (e) { if (e.target.files[0]) loadJson(e.target.files[0]); e.target.value = ""; });
     $("#btnClear").addEventListener("click", clearAll);
 
     if (Object.keys(answers).length) { $("#saveDot").className = "dot saved"; $("#saveText").textContent = "تم استرجاع عملك المحفوظ"; }

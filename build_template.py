@@ -27,6 +27,7 @@ OUT = os.path.join(HERE, "al-ahli-sijillat-template.xlsx")
 SHAPE_LABEL = {
     "matrix": "مصفوفة سنوات",
     "document": "وثيقة مرفقة",
+    "select": "حالة (اختيار)",
     "pii": "قائمة مستفيدين (PII)",
 }
 AVAIL_LABEL = {

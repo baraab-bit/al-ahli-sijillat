@@ -17,7 +17,7 @@
  *             id,                // stable key for localStorage / export
  *             stage,             // one of stages
  *             label,             // البند / المؤشر (faithful to register)
- *             shape,             // "matrix" | "document" | "pii"
+ *             shape,             // "matrix" | "document" | "select" | "pii"
  *             years,             // override program years for this item (optional)
  *             source,            // المصدر / الجهة المالكة
  *             status,            // availability status (register)
@@ -32,6 +32,7 @@
  * shape semantics:
  *   matrix   → years × question grid (numeric/text cell per year)
  *   document → checklist row: status select + notes (NO file upload — emailed separately)
+ *   select   → partnership/agreement status dropdown + notes (doc emailed separately)
  *   pii      → instruction card: NO personal data entered; only "ready to send" status + count
  * ========================================================================== */
 
@@ -58,13 +59,22 @@ const PII_STATUS_OPTIONS = [
   { value: "unavailable", label: "غير متوفرة" }
 ];
 
+// Partnership/agreement status — used by `select`-shape status items ----------
+const PARTNERSHIP_STATUS_OPTIONS = [
+  { value: "",         label: "— اختر الحالة —" },
+  { value: "active",   label: "نشطة" },
+  { value: "inactive", label: "غير نشطة" },
+  { value: "expired",  label: "منتهية" },
+  { value: "renewing", label: "قيد التجديد" }
+];
+
 const DEFAULT_YEARS = [2022, 2023, 2024, 2025];
 
 const REGISTER = {
   meta: {
     client: "البنك الأهلي السعودي (SNB) — إدارة المسؤولية المجتمعية · برامج «أهالينا»",
     project: "قياس أثر برامج خدمة المجتمع — سجل جمع البيانات (السجلات)",
-    preparedBy: "قرارات (Qararat AI) — رئاسة قياس الأثر",
+    preparedBy: "قرارات (Qararat AI)",
     date: "2026-06-24",
     statusNote: "نموذج جمع بيانات — يُملأ على مراحل، يُحفظ تلقائياً، ويُصدَّر إلى Excel للإرسال."
   },
@@ -79,11 +89,11 @@ const REGISTER = {
       id: "p1_handicraft",
       name: "الإنتاج الحرفي",
       years: [2022, 2023, 2024, 2025],
-      note: "السنوات مؤكَّدة 2022–2025. السجلات لدى الجمعيات (الفيصلية + حرفة) وهيئة التراث؛ البدجت والاختيار من البنك.",
+      note: "السنوات مؤكَّدة 2022–2025. السجلات لدى الجمعيات (الفيصلية + حرفة) وهيئة التراث؛ الميزانية والاختيار من البنك.",
       unreviewed: false,
       items: [
         { id: "p1_i01", stage: "مدخلات", shape: "matrix", label: "عدد المدربين المعتمدين (لكل سنة)", source: "الجمعية / هيئة التراث", status: "fetch", notes: "المدربات اللاتي يقدّمن التدريب." },
-        { id: "p1_i02", stage: "مدخلات", shape: "document", label: "حالة الشراكة مع وزارة الثقافة / هيئة التراث", source: "البنك / هيئة التراث", status: "fetch", notes: "مذكرة التفاهم بين البنك وهيئة التراث؛ هيئة التراث = إشراف، البدجت من البنك." },
+        { id: "p1_i02", stage: "مدخلات", shape: "select", label: "حالة الشراكة مع وزارة الثقافة / هيئة التراث", source: "البنك / هيئة التراث", status: "fetch", notes: "حالة مذكرة التفاهم بين البنك وهيئة التراث؛ هيئة التراث = إشراف، الميزانية من البنك. المذكرة تُرسَل بالبريد بشكل منفصل." },
         { id: "p1_i03", stage: "مدخلات", shape: "matrix", label: "عدد المسارات الحرفية المتاحة", source: "الجمعية", status: "fetch", notes: "" },
         { id: "p1_i04", stage: "مدخلات", shape: "matrix", label: "نسبة جاهزية الحقيبة التدريبية (%)", source: "الجمعية — تُقيَّم بروبريك من قرارات", status: "fetch", notes: "مؤشر مُقدَّر لا مُبلَّغ ذاتياً؛ تُرسَل نماذج الحقائب ليقيّمها فريق قرارات." },
         { id: "p1_i05", stage: "مدخلات", shape: "document", label: "نماذج الحقائب التدريبية المعتمدة", source: "الجمعية", status: "fetch", notes: "المدخل الفعلي لتقييم الجاهزية أعلاه." },
@@ -97,23 +107,16 @@ const REGISTER = {
         { id: "p1_i12", stage: "أنشطة", shape: "matrix", label: "نسبة إكمال الدورة (Retention) (%)", source: "الجمعية", status: "available", notes: "" },
         { id: "p1_i13", stage: "أنشطة", shape: "matrix", label: "رضا المستفيدات عن التدريب (النتيجة سنوياً)", source: "الجمعية", status: "available", notes: "استبيان بعد كل دورة موجود؛ تُستخرَج النتيجة سنوياً (الفورم يُرفق كوثيقة أدناه)." },
         { id: "p1_i14", stage: "أنشطة", shape: "document", label: "نموذج استبيان الرضا (الكوسينير) بعد الدورة", source: "الجمعية", status: "available", notes: "يُرفق الفورم كاملاً." },
-        { id: "p1_i15", stage: "أنشطة", shape: "matrix", label: "احتمالية التوصية (NPS)", source: "الجمعية", status: "fetch", notes: "يُتحقَّق إن كان السؤال داخل الفورم؛ وإلا يُلتقَط لاحقاً." },
         { id: "p1_i16", stage: "أنشطة", shape: "matrix", label: "عدد طلبات الالتحاق المستلمة", source: "الجمعية", status: "fetch", notes: "مثال: 100 قدّموا، 50 قُبلوا." },
-        { id: "p1_i17", stage: "أنشطة", shape: "matrix", label: "معدل القبول (%)", source: "الجمعية", status: "fetch", notes: "بالتبعية من الطلبات / المقبولين." },
-        { id: "p1_i18", stage: "أنشطة", shape: "matrix", label: "نسبة المستفيدات من الفئات الأولى بالرعاية (%)", source: "الجمعية", status: "available", notes: "مسجَّلات مستفيدات في الجمعية (دخل محدود + دراسة حالة)." },
+        { id: "p1_i29", stage: "أنشطة", shape: "matrix", label: "عدد المقبولات (لكل سنة)", source: "الجمعية", status: "fetch", notes: "العدد الخام للمقبولات؛ يحسب فريق قرارات معدل القبول من الطلبات والمقبولات." },
+        { id: "p1_i30", stage: "أنشطة", shape: "matrix", label: "عدد المستفيدات من الفئات الأولى بالرعاية (لكل سنة)", source: "الجمعية", status: "available", notes: "العدد الخام؛ مسجَّلات مستفيدات في الجمعية (دخل محدود + دراسة حالة). الإجمالي محسوب من عدد المتدربات." },
 
-        { id: "p1_i19", stage: "مخرجات", shape: "matrix", label: "نسبة التخرج (%)", source: "الجمعية", status: "available", notes: "= نسبة إكمال الدورة (أكّد العميل أنهما نفسهما)." },
-        { id: "p1_i20", stage: "مخرجات", shape: "matrix", label: "عدد المتخرجات من الدورات الحرفية (تراكمي)", source: "الجمعية", status: "available", notes: "تراكمي." },
+        { id: "p1_i31", stage: "مخرجات", shape: "matrix", label: "عدد المتخرجات (لكل سنة)", source: "الجمعية", status: "available", notes: "العدد الخام لكل سنة (لا تراكمي)؛ يحسب فريق قرارات التراكمي والنسب." },
 
-        { id: "p1_i21", stage: "نتائج", shape: "matrix", label: "نسبة زيادة المعرفة الحرفية (%)", source: "الجمعية (استبيان)", status: "available", notes: "self-reported." },
-        { id: "p1_i22", stage: "نتائج", shape: "matrix", label: "نسبة اكتساب المهارات الحرفية (%)", source: "الجمعية (استبيان)", status: "available", notes: "self-reported." },
-        { id: "p1_i23", stage: "نتائج", shape: "matrix", label: "نسبة المستفيدات اللاتي يشعرن بزيادة الثقة (%)", source: "الجمعية (استبيان)", status: "available", notes: "self-reported." },
-        { id: "p1_i24", stage: "نتائج", shape: "matrix", label: "نسبة زيادة الحافزية للعمل المستقل (%)", source: "الجمعية (استبيان)", status: "available", notes: "self-reported." },
-        { id: "p1_i25", stage: "نتائج", shape: "matrix", label: "إنتاج منتج قابل للبيع (عدد/نسبة)", source: "الجمعية", status: "available", notes: "سجل." },
+        { id: "p1_i25", stage: "نتائج", shape: "matrix", label: "عدد المستفيدات اللاتي أنتجن منتجاً قابلاً للبيع (لكل سنة)", source: "الجمعية", status: "available", notes: "سجل — العدد الخام (لا النسبة)." },
 
-        { id: "p1_i26", stage: "أثر", shape: "matrix", label: "التغير في الدخل الشهري بعد التدريب", source: "المتدربات (استبيان)", status: "permission", notes: "يتطلّب كونتاكت المتدربات (القائمة أدناه)." },
         { id: "p1_i27", stage: "أثر", shape: "matrix", label: "متوسط المبيعات الشهرية عبر (سلة)", source: "الجمعية / سلة", status: "available", notes: "مرتبط بمبادرة سلة (سنة واحدة)." },
-        { id: "p1_i28", stage: "أثر", shape: "matrix", label: "عدد الحرف التراثية المُدرَّسة + نية الاستمرار + التحسّن المُدرَك في جودة الحياة", source: "الجمعية / المتدربات (استبيان)", status: "available", notes: "الإدراكية self-reported عبر كونتاكت المتدربات." },
+        { id: "p1_i28", stage: "أثر", shape: "matrix", label: "عدد الحرف التراثية المُدرَّسة (لكل سنة)", source: "الجمعية", status: "available", notes: "سجل — عدد الحرف التراثية التي دُرِّست." },
 
         { id: "p1_pii1", stage: "أثر", shape: "pii", label: "قائمة المتدربات (اسم + جوال + بريد + مدينة + جنس)", source: "الجمعية", status: "fetch", notes: "قائمة لكل سنة 2022–2025؛ أساس استبيانات الأثر/النتائج." },
         { id: "p1_pii2", stage: "أثر", shape: "pii", label: "قائمة المدربات (اسم + بيانات)", source: "الجمعية / هيئة التراث", status: "fetch", notes: "المدربات المعتمدات لكل سنة." }
@@ -132,19 +135,14 @@ const REGISTER = {
       items: [
         { id: "p2_i01", stage: "مدخلات", shape: "document", label: "جاهزية آلية الاستحقاق ومعايير الأهلية", source: "البنك / الوزارة", status: "available", notes: "الشروط موجودة من بداية البرنامج." },
         { id: "p2_i02", stage: "مدخلات", shape: "matrix", label: "الميزانية السنوية المخصصة", source: "البنك", status: "available", notes: "سنوية ضمن اتفاقية ثلاث سنوات." },
-        { id: "p2_i03", stage: "مدخلات", shape: "document", label: "حالة اتفاقية الشراكة مع وزارة الإسكان", source: "البنك / الوزارة", status: "available", notes: "شراكة من أول البرنامج بلا تغيّر." },
+        { id: "p2_i03", stage: "مدخلات", shape: "select", label: "حالة اتفاقية الشراكة مع وزارة الإسكان", source: "البنك / الوزارة", status: "available", notes: "حالة الاتفاقية؛ شراكة من أول البرنامج. المستند يُرسَل بالبريد بشكل منفصل." },
         { id: "p2_i04", stage: "مدخلات", shape: "matrix", label: "عدد المستفيدين المحالين من وزارة الإسكان", source: "الوزارة → البنك", status: "available", notes: "كلهم محالون من الوزارة." },
 
-        { id: "p2_i05", stage: "أنشطة", shape: "matrix", label: "نسبة الفئات الأولى بالرعاية من إجمالي المختارين (%)", source: "الوزارة", status: "available", notes: "100% — كلهم فئات أولى (مؤكَّد)." },
-        { id: "p2_i06", stage: "أنشطة", shape: "matrix", label: "عدد الوحدات السكنية المسلَّمة سنوياً", source: "الوزارة → البنك", status: "available", notes: "الوزارة تُعطي قائمة المستلِمين ليعتمدها البنك." },
-        { id: "p2_i07", stage: "أنشطة", shape: "matrix", label: "عدد الوحدات السكنية المسلَّمة (تراكمي)", source: "الوزارة → البنك", status: "available", notes: "" },
+        { id: "p2_i06", stage: "أنشطة", shape: "matrix", label: "عدد الوحدات السكنية المسلَّمة سنوياً", source: "الوزارة → البنك", status: "available", notes: "العدد الخام لكل سنة؛ يحسب فريق قرارات التراكمي." },
 
-        { id: "p2_i08", stage: "مخرجات", shape: "matrix", label: "عدد الأسر المستفيدة سنوياً", source: "الوزارة → البنك", status: "available", notes: "متوافق مع عدد الوحدات السكنية." },
-        { id: "p2_i09", stage: "مخرجات", shape: "matrix", label: "عدد الأسر المستفيدة (تراكمي)", source: "الوزارة → البنك", status: "available", notes: "" },
-        { id: "p2_i10", stage: "مخرجات", shape: "matrix", label: "توزيع المستفيدين حسب الفئة", source: "الوزارة", status: "available", notes: "" },
-
-        { id: "p2_i11", stage: "نتائج", shape: "matrix", label: "مؤشرات الإدراك: انخفاض الضغط المالي · رضا عن جودة الوحدة · زيادة الاستقرار الأسري · الشعور بالاستقرار السكني · التغير في الفرص الاقتصادية · التحسّن المُدرَك في جودة الحياة", source: "المستفيدون (استبيان)", status: "permission", notes: "تتطلّب التواصل المباشر بالمستفيدين؛ الكونتاكت بحوزة الوزارة. أُضيف «عدد أفراد الأسرة»." },
-        { id: "p2_i12", stage: "نتائج", shape: "matrix", label: "متوسط الإيجار الشهري قبل البرنامج", source: "المستفيدون (استبيان)", status: "permission", notes: "خط أساس self-reported عبر الاستبيان." },
+        { id: "p2_i08", stage: "مخرجات", shape: "matrix", label: "عدد الأسر المستفيدة سنوياً", source: "الوزارة → البنك", status: "available", notes: "العدد الخام لكل سنة؛ يحسب فريق قرارات التراكمي. متوافق مع عدد الوحدات السكنية." },
+        { id: "p2_i13", stage: "مخرجات", shape: "matrix", label: "عدد الأسر المستفيدة حسب المنطقة/المدينة (لكل سنة)", source: "الوزارة", status: "available", notes: "صفّ واحد لكل مدينة؛ أدخِل العدد لكل مدينة وسنة (التوزيع الجغرافي للمستفيدين)." },
+        { id: "p2_i14", stage: "مخرجات", shape: "matrix", label: "عدد الأسر المستفيدة حسب فئة الاستحقاق التنموي (لكل سنة)", source: "الوزارة", status: "available", notes: "يُملأ فقط إن اختلفت الفئات (السجل يشير إلى 100% فئة واحدة) — مرشّح للحذف بعد مراجعة المالك." },
 
         { id: "p2_pii1", stage: "نتائج", shape: "pii", label: "قائمة الأسر المستفيدة (اسم + جوال + مدينة + عدد أفراد الأسرة)", source: "الوزارة → (بإذن) البنك", status: "permission", notes: "شرط قياس الأثر كله؛ معلّق على إذن الوزارة." }
       ]
@@ -161,27 +159,29 @@ const REGISTER = {
       unreviewed: false,
       items: [
         { id: "p3_i01", stage: "مدخلات", shape: "matrix", label: "الميزانية السنوية المخصصة", source: "البنك", status: "available", notes: "" },
-        { id: "p3_i02", stage: "مدخلات", shape: "matrix", label: "نسبة صرف الميزانية (%)", source: "البنك", status: "available", notes: "" },
+        { id: "p3_i20", stage: "مدخلات", shape: "matrix", label: "المبلغ المصروف من الميزانية (لكل سنة)", source: "البنك", status: "available", notes: "المبلغ الخام المصروف؛ يحسب فريق قرارات نسبة الصرف من المخصص." },
         { id: "p3_i03", stage: "مدخلات", shape: "matrix", label: "تكلفة الشجرة الواحدة", source: "البنك", status: "available", notes: "" },
         { id: "p3_i04", stage: "مدخلات", shape: "matrix", label: "عدد الشراكات الفعّالة", source: "البنك", status: "available", notes: "" },
         { id: "p3_i05", stage: "مدخلات", shape: "matrix", label: "عدد الجهات الحكومية المشاركة", source: "البنك", status: "available", notes: "" },
 
         { id: "p3_i06", stage: "أنشطة", shape: "matrix", label: "عدد حملات الزراعة المنفذة", source: "البنك", status: "available", notes: "" },
         { id: "p3_i07", stage: "أنشطة", shape: "matrix", label: "عدد أنظمة معالجة المياه الرمادية المركَّبة", source: "البنك / الوزارة", status: "available", notes: "= عدد المساجد (نظام واحد لكل مسجد)." },
-        { id: "p3_i08", stage: "أنشطة", shape: "matrix", label: "نسبة الأنظمة العاملة بعد التركيب (%)", source: "البنك / الوزارة", status: "available", notes: "عقد صيانة موجود." },
+        { id: "p3_i21", stage: "أنشطة", shape: "matrix", label: "عدد الأنظمة العاملة بعد التركيب (لكل سنة)", source: "البنك / الوزارة", status: "available", notes: "العدد الخام؛ يحسب فريق قرارات النسبة من المركَّبة. عقد صيانة موجود." },
         { id: "p3_i09", stage: "أنشطة", shape: "matrix", label: "عدد المساجد المستهدفة سنوياً", source: "البنك", status: "available", notes: "" },
-        { id: "p3_i10", stage: "أنشطة", shape: "matrix", label: "نسبة إكمال أعمال التشجير في المساجد المستهدفة (%)", source: "البنك", status: "available", notes: "" },
+        { id: "p3_i22", stage: "أنشطة", shape: "matrix", label: "عدد المساجد المكتمل تشجيرها (لكل سنة)", source: "البنك", status: "available", notes: "العدد الخام؛ يحسب فريق قرارات نسبة الإكمال من المستهدفة." },
 
-        { id: "p3_i11", stage: "مخرجات", shape: "matrix", label: "عدد المواقع المزروعة (تراكمي) + التوزيع الجغرافي", source: "البنك", status: "available", notes: "التوزيع: مثلاً موقعان جيزان + ينبع." },
-        { id: "p3_i12", stage: "مخرجات", shape: "matrix", label: "المساحة الإجمالية المزروعة + المساحة المغطاة في المساجد", source: "البنك", status: "available", notes: "" },
-        { id: "p3_i13", stage: "مخرجات", shape: "matrix", label: "عدد الأشجار المزروعة سنوياً + (تراكمي)", source: "البنك", status: "available", notes: "" },
+        { id: "p3_i11", stage: "مخرجات", shape: "matrix", label: "عدد المواقع المزروعة (لكل سنة)", source: "البنك", status: "available", notes: "العدد الخام لكل سنة؛ يحسب فريق قرارات التراكمي." },
+        { id: "p3_i23", stage: "مخرجات", shape: "matrix", label: "التوزيع الجغرافي للمواقع (المدن لكل سنة)", source: "البنك", status: "available", notes: "مثلاً موقعان جيزان + ينبع — المدن المغطّاة لكل سنة." },
+        { id: "p3_i24", stage: "مخرجات", shape: "matrix", label: "المساحة المزروعة الإجمالية (م²، لكل سنة)", source: "البنك", status: "available", notes: "" },
+        { id: "p3_i25", stage: "مخرجات", shape: "matrix", label: "المساحة المغطاة بالتشجير في المساجد (م²، لكل سنة)", source: "البنك", status: "available", notes: "" },
+        { id: "p3_i13", stage: "مخرجات", shape: "matrix", label: "عدد الأشجار المزروعة (لكل سنة)", source: "البنك", status: "available", notes: "العدد الخام لكل سنة؛ يحسب فريق قرارات التراكمي." },
 
-        { id: "p3_i14", stage: "نتائج", shape: "matrix", label: "كمية المياه الرمادية المعالجة سنوياً (تراكمي)", source: "البنك / الوزارة", status: "fetch", notes: "أُعيدت صياغته من «نسبة توفير المياه». الهدف معالجة لا توفير." },
+        { id: "p3_i14", stage: "نتائج", shape: "matrix", label: "كمية المياه الرمادية المعالجة (لكل سنة)", source: "البنك / الوزارة", status: "fetch", notes: "أُعيدت صياغته من «نسبة توفير المياه». الكمية الخام لكل سنة؛ يحسب فريق قرارات التراكمي. الهدف معالجة لا توفير." },
         { id: "p3_i15", stage: "نتائج", shape: "matrix", label: "عدد المساجد ذات الأنظمة العاملة", source: "البنك / الوزارة", status: "available", notes: "" },
         { id: "p3_i16", stage: "نتائج", shape: "document", label: "تقييم الشركاء لأثر البرنامج البيئي", source: "وزارة البيئة (الشريك)", status: "permission", notes: "الشركاء = وزارة البيئة؛ البنك يرسل كونتاكتهم." },
-        { id: "p3_i17", stage: "نتائج", shape: "matrix", label: "معدل بقاء الأشجار حالياً في المواقع + في المساجد (%)", source: "وزارة البيئة", status: "permission", notes: "program-supplied عبر الوزارة." },
+        { id: "p3_i17", stage: "نتائج", shape: "matrix", label: "معدل بقاء الأشجار في المواقع (%)", source: "وزارة البيئة", status: "permission", notes: "program-supplied عبر الوزارة (سجل مُقدَّم من الوزارة)." },
+        { id: "p3_i26", stage: "نتائج", shape: "matrix", label: "معدل بقاء الأشجار في المساجد (%)", source: "وزارة البيئة", status: "permission", notes: "program-supplied عبر الوزارة (سجل مُقدَّم من الوزارة)." },
 
-        { id: "p3_i18", stage: "أثر", shape: "matrix", label: "نسبة المساهمة في هدف 10 مليار شجرة (%)", source: "البنك", status: "available", notes: "" },
         { id: "p3_i19", stage: "أثر", shape: "matrix", label: "الفوت برنت / نسبة الخفض الكربوني (مانجروف وغيره)", years: [2026, 2027, 2028, 2029], source: "البنك / الوزارة", status: "fetch", notes: "يبدأ من السنة القادمة؛ لم يُعتمَد بعد لدى الوزارة." }
       ]
     },
@@ -198,19 +198,20 @@ const REGISTER = {
       items: [
         { id: "p4_i01", stage: "مدخلات", shape: "matrix", label: "عدد أعضاء فريق إدارة البرنامج", source: "البنك", status: "available", notes: "موظفو البنك + champions لكل مدينة." },
         { id: "p4_i02", stage: "مدخلات", shape: "matrix", label: "عدد الشركاء", source: "البنك", status: "available", notes: "أُعيدت صياغته من «نسبة جاهزية الشريك». شريكان (عام + غدا)." },
-        { id: "p4_i03", stage: "مدخلات", shape: "document", label: "حالة إدارة حملات التوعية والتحفيز", source: "البنك / غدا", status: "fetch", notes: "ضمن التقارير السنوية." },
+        { id: "p4_i03", stage: "مدخلات", shape: "select", label: "حالة إدارة حملات التوعية والتحفيز", source: "البنك / غدا", status: "fetch", notes: "حالة إدارة الحملات؛ ضمن التقارير السنوية. التفاصيل تُرسَل بالبريد بشكل منفصل." },
 
         { id: "p4_i04", stage: "أنشطة", shape: "matrix", label: "عدد الأدوات التوعوية المنشورة", source: "البنك / غدا", status: "fetch", notes: "منشورات سوشيال؛ تحتاج تدقيق («8000 منشور»)." },
         { id: "p4_i05", stage: "أنشطة", shape: "matrix", label: "عدد الفرص التطوعية المصمَّمة", source: "البنك / غدا", status: "available", notes: "من التقرير السنوي." },
-        { id: "p4_i06", stage: "أنشطة", shape: "matrix", label: "نسبة الفرص الاحترافية من إجمالي الفرص (%)", source: "غدا", status: "available", notes: "من تقارير المسارين." },
-        { id: "p4_i07", stage: "أنشطة", shape: "matrix", label: "نسبة الفرص المنفَّذة من المخطَّط لها (%)", source: "البنك / غدا", status: "available", notes: "" },
-        { id: "p4_i08", stage: "أنشطة", shape: "matrix", label: "عدد الفرص المنفَّذة + عدد المتطوعين المسجَّلين لكل فرصة", source: "البنك / غدا", status: "available", notes: "" },
+        { id: "p4_i14", stage: "أنشطة", shape: "matrix", label: "عدد الفرص الاحترافية المصمَّمة (لكل سنة)", source: "غدا", status: "available", notes: "العدد الخام؛ يحسب فريق قرارات نسبة الفرص الاحترافية من إجمالي الفرص المصمَّمة." },
+        { id: "p4_i15", stage: "أنشطة", shape: "matrix", label: "عدد الفرص المخطَّط لها (لكل سنة)", source: "البنك / غدا", status: "available", notes: "العدد الخام؛ يحسب فريق قرارات نسبة المنفَّذ من المخطَّط (المنفَّذة أدناه)." },
+        { id: "p4_i16", stage: "أنشطة", shape: "matrix", label: "عدد الفرص المنفَّذة (لكل سنة)", source: "البنك / غدا", status: "available", notes: "" },
+        { id: "p4_i17", stage: "أنشطة", shape: "matrix", label: "عدد المتطوعين المسجَّلين (لكل سنة)", source: "البنك / غدا", status: "available", notes: "" },
 
-        { id: "p4_i09", stage: "مخرجات", shape: "matrix", label: "عدد ساعات العمل التطوعي سنوياً + متوسط الساعات لكل متطوع + القيمة الاقتصادية", source: "البنك / غدا", status: "available", notes: "في التقرير السنوي النهائي." },
+        { id: "p4_i09", stage: "مخرجات", shape: "matrix", label: "عدد ساعات العمل التطوعي (لكل سنة)", source: "البنك / غدا", status: "available", notes: "العدد الخام؛ يحسب فريق قرارات متوسط الساعات لكل متطوع. في التقرير السنوي النهائي." },
+        { id: "p4_i18", stage: "مخرجات", shape: "matrix", label: "القيمة الاقتصادية للساعات التطوعية (لكل سنة)", source: "البنك / غدا", status: "fetch", notes: "يُؤكَّد مع المالك: هل يكتب العميل رقماً فعلياً أم يحسبه فريق قرارات؟" },
         { id: "p4_i10", stage: "مخرجات", shape: "matrix", label: "عدد المتطوعين المشاركين في التطوع الاحترافي سنوياً", source: "غدا", status: "available", notes: "" },
-        { id: "p4_i11", stage: "مخرجات", shape: "matrix", label: "عدد الجهات المستفيدة سنوياً + تنوّع قطاعات الجهات", source: "البنك / غدا", status: "available", notes: "" },
-
-        { id: "p4_i12", stage: "نتائج", shape: "matrix", label: "زيادة الشعور بمتعة العطاء · الراغبون في التطوع مجدداً · زيادة الارتباط الوظيفي · الفخر بالانتماء للبنك · اكتساب مهارة جديدة", source: "المتطوعون (استبيان)", status: "permission", notes: "self-reported عبر كونتاكت المتطوعين." },
+        { id: "p4_i19", stage: "مخرجات", shape: "matrix", label: "عدد الجهات المستفيدة (لكل سنة)", source: "البنك / غدا", status: "available", notes: "" },
+        { id: "p4_i20", stage: "مخرجات", shape: "matrix", label: "عدد قطاعات الجهات المستفيدة / قائمة القطاعات (لكل سنة)", source: "البنك / غدا", status: "available", notes: "عدد القطاعات أو قائمتها — تنوّع قطاعات الجهات المستفيدة." },
 
         { id: "p4_i13", stage: "أثر", shape: "matrix", label: "رفع معدلات ساعات التطوع في المملكة (مساهمة رؤية 2030)", source: "البنك", status: "available", notes: "سجل." },
 
@@ -233,26 +234,19 @@ const REGISTER = {
       unreviewed: true,
       items: [
         { id: "p5_i01", stage: "مدخلات", shape: "matrix", label: "عدد الموظفين في الفروع", source: "الجمعية / البنك", status: "unreviewed", unreviewed: true, notes: "ن3 سجلات." },
-        { id: "p5_i02", stage: "مدخلات", shape: "matrix", label: "نسبة الموظفات ذوات الدخل الشهري المستقل (%)", source: "الجمعية / البنك", status: "unreviewed", unreviewed: true, notes: "ن3 سجلات." },
+        { id: "p5_i18", stage: "مدخلات", shape: "matrix", label: "عدد الموظفات ذوات الدخل المستقل (لكل سنة)", source: "الجمعية / البنك", status: "unreviewed", unreviewed: true, notes: "العدد الخام؛ يحسب فريق قرارات النسبة من إجمالي الموظفين." },
         { id: "p5_i03", stage: "مدخلات", shape: "matrix", label: "عدد الفروع المخصصة للبرنامج", source: "البنك", status: "unreviewed", unreviewed: true, notes: "" },
         { id: "p5_i04", stage: "مدخلات", shape: "matrix", label: "الميزانية المخصصة", source: "البنك", status: "unreviewed", unreviewed: true, notes: "" },
 
         { id: "p5_i05", stage: "أنشطة", shape: "matrix", label: "عدد القروض التي تم تقديمها", source: "الجمعية / البنك", status: "unreviewed", unreviewed: true, notes: "" },
-        { id: "p5_i06", stage: "أنشطة", shape: "matrix", label: "معدل قبول المتقدمين (%)", source: "الجمعية / البنك", status: "unreviewed", unreviewed: true, notes: "" },
+        { id: "p5_i19", stage: "أنشطة", shape: "matrix", label: "عدد القروض المقبولة (لكل سنة)", source: "الجمعية / البنك", status: "unreviewed", unreviewed: true, notes: "العدد الخام؛ يحسب فريق قرارات معدل القبول من الطلبات." },
         { id: "p5_i07", stage: "أنشطة", shape: "matrix", label: "عدد طلبات التقديم على القروض", source: "الجمعية / البنك", status: "unreviewed", unreviewed: true, notes: "" },
-        { id: "p5_i08", stage: "أنشطة", shape: "matrix", label: "معدل تحصيل القروض (%)", source: "الجمعية / البنك", status: "unreviewed", unreviewed: true, notes: "" },
+        { id: "p5_i20", stage: "أنشطة", shape: "matrix", label: "قيمة القروض المحصَّلة (لكل سنة)", source: "الجمعية / البنك", status: "unreviewed", unreviewed: true, notes: "القيمة الخام؛ يحسب فريق قرارات معدل التحصيل من القيمة المقدمة." },
 
         { id: "p5_i09", stage: "مخرجات", shape: "matrix", label: "قيمة القروض المقدمة سنوياً", source: "الجمعية / البنك", status: "unreviewed", unreviewed: true, notes: "" },
         { id: "p5_i10", stage: "مخرجات", shape: "matrix", label: "عدد المستفيدات الحاصلات على قروض", source: "الجمعية / البنك", status: "unreviewed", unreviewed: true, notes: "" },
 
-        { id: "p5_i11", stage: "نتائج", shape: "matrix", label: "قيمة الزيادة في الدخل الشهري بسبب القرض", source: "المستفيدات (استبيان)", status: "unreviewed", unreviewed: true, notes: "self-reported؛ ن3 استبيان." },
-        { id: "p5_i12", stage: "نتائج", shape: "matrix", label: "نسبة المستفيدات اللاتي أطلقن مشاريع تجارية (%)", source: "المستفيدات (استبيان)", status: "unreviewed", unreviewed: true, notes: "ن3 استبيان." },
-        { id: "p5_i13", stage: "نتائج", shape: "matrix", label: "عدد المشاريع التجارية التي تم إطلاقها", source: "المستفيدات (استبيان)", status: "unreviewed", unreviewed: true, notes: "ن3 استبيان." },
-        { id: "p5_i14", stage: "نتائج", shape: "matrix", label: "عدد الشهور التي يحقق المشروع أرباح + عدد الشهور التي يحقق مبيعات", source: "المستفيدات (استبيان)", status: "unreviewed", unreviewed: true, notes: "ن3 استبيان." },
-
-        { id: "p5_i15", stage: "أثر", shape: "matrix", label: "نسبة تغطية الدخل الشهري للاحتياجات الأساسية للمستفيد (%)", source: "المستفيدات (استبيان)", status: "unreviewed", unreviewed: true, notes: "ن3 استبيان." },
-        { id: "p5_i16", stage: "أثر", shape: "matrix", label: "متوسط نسبة نمو المبيعات السنوية (%)", source: "المستفيدات (استبيان)", status: "unreviewed", unreviewed: true, notes: "ن3 استبيان." },
-        { id: "p5_i17", stage: "أثر", shape: "matrix", label: "نسبة رضا المستفيد عن جودة حياته بعد القرض (%)", source: "المستفيدات (استبيان)", status: "unreviewed", unreviewed: true, notes: "ن3 استبيان." }
+        { id: "p5_i13", stage: "نتائج", shape: "matrix", label: "عدد المشاريع التجارية التي تم إطلاقها", source: "المستفيدات (سجل الجمعية إن وُجد)", status: "unreviewed", unreviewed: true, notes: "يُبقى إن كان لدى الجمعية/البنك سجل بالمشاريع المُطلَقة؛ إن كان معروفاً عبر الاستبيان فقط فيُحذَف. مرشّح للمراجعة." }
       ]
     },
 
@@ -267,25 +261,28 @@ const REGISTER = {
       unreviewed: true,
       items: [
         { id: "p6_i01", stage: "مدخلات", shape: "matrix", label: "الميزانية السنوية المخصصة", source: "البنك", status: "unreviewed", unreviewed: true, notes: "" },
-        { id: "p6_i02", stage: "مدخلات", shape: "matrix", label: "نسبة صرف الميزانية (%)", source: "البنك", status: "unreviewed", unreviewed: true, notes: "" },
-        { id: "p6_i03", stage: "مدخلات", shape: "matrix", label: "عدد اتفاقيات الشراكة الفعّالة", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "" },
+        { id: "p6_i19", stage: "مدخلات", shape: "matrix", label: "المبلغ المصروف من الميزانية (لكل سنة)", source: "البنك", status: "unreviewed", unreviewed: true, notes: "المبلغ الخام؛ يحسب فريق قرارات نسبة الصرف من المخصص." },
+        { id: "p6_i03", stage: "مدخلات", shape: "select", label: "حالة اتفاقيات الشراكة الفعّالة", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "حالة الشراكة مع أروقة؛ المستند يُرسَل بالبريد بشكل منفصل." },
         { id: "p6_i04", stage: "مدخلات", shape: "matrix", label: "جاهزية نظام التشغيل (الحاضنة الخاصة بالبنك)", source: "البنك", status: "unreviewed", unreviewed: true, notes: "" },
 
-        { id: "p6_i05", stage: "أنشطة", shape: "matrix", label: "رضا المستفيدين عن خدمات الاحتضان (%)", source: "المستفيدون (استبيان)", status: "unreviewed", unreviewed: true, notes: "ن3 استبيان." },
         { id: "p6_i06", stage: "أنشطة", shape: "matrix", label: "إجمالي التمويل المقدم للشركات الناشئة", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "" },
-        { id: "p6_i07", stage: "أنشطة", shape: "matrix", label: "عدد ساعات التدريب المقدمة + عدد جلسات الإرشاد الفردية + احتمالية التوصية", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "" },
-        { id: "p6_i08", stage: "أنشطة", shape: "matrix", label: "عدد طلبات الالتحاق المستلمة + معدل القبول", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "" },
-        { id: "p6_i09", stage: "أنشطة", shape: "matrix", label: "عدد فعاليات الربط مع المستثمرين + عدد المستثمرين المشاركين", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "" },
+        { id: "p6_i20", stage: "أنشطة", shape: "matrix", label: "عدد ساعات التدريب (لكل سنة)", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "" },
+        { id: "p6_i21", stage: "أنشطة", shape: "matrix", label: "عدد جلسات الإرشاد الفردية (لكل سنة)", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "" },
+        { id: "p6_i22", stage: "أنشطة", shape: "matrix", label: "عدد طلبات الالتحاق (لكل سنة)", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "" },
+        { id: "p6_i23", stage: "أنشطة", shape: "matrix", label: "عدد المقبولين (لكل سنة)", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "العدد الخام؛ يحسب فريق قرارات معدل القبول من الطلبات." },
+        { id: "p6_i24", stage: "أنشطة", shape: "matrix", label: "عدد فعاليات الربط (لكل سنة)", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "" },
+        { id: "p6_i25", stage: "أنشطة", shape: "matrix", label: "عدد المستثمرين المشاركين (لكل سنة)", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "" },
 
-        { id: "p6_i10", stage: "مخرجات", shape: "matrix", label: "عدد الاتفاقيات الاستثمارية الموقعة + إجمالي قيمتها", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "" },
-        { id: "p6_i11", stage: "مخرجات", shape: "matrix", label: "عدد رواد الأعمال المحتضنين (تراكمي)", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "" },
-        { id: "p6_i12", stage: "مخرجات", shape: "matrix", label: "عدد الشركات المحتضنة سنوياً + (تراكمي)", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "" },
+        { id: "p6_i26", stage: "مخرجات", shape: "matrix", label: "عدد الاتفاقيات الاستثمارية الموقعة (لكل سنة)", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "" },
+        { id: "p6_i27", stage: "مخرجات", shape: "matrix", label: "إجمالي قيمة الاتفاقيات الاستثمارية (لكل سنة)", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "" },
+        { id: "p6_i28", stage: "مخرجات", shape: "matrix", label: "عدد رواد الأعمال المحتضنين (لكل سنة)", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "العدد الخام لكل سنة؛ يحسب فريق قرارات التراكمي." },
+        { id: "p6_i12", stage: "مخرجات", shape: "matrix", label: "عدد الشركات المحتضنة (لكل سنة)", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "العدد الخام لكل سنة؛ يحسب فريق قرارات التراكمي." },
 
-        { id: "p6_i13", stage: "نتائج", shape: "matrix", label: "معدل البقاء بعد سنتين + بعد خمس سنوات (%)", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "ن3 سجلات." },
-        { id: "p6_i14", stage: "نتائج", shape: "matrix", label: "ثقة المؤسس في استمرارية المشروع", source: "المؤسسون (استبيان)", status: "unreviewed", unreviewed: true, notes: "ن3 استبيان." },
-        { id: "p6_i15", stage: "نتائج", shape: "matrix", label: "التحسّن المُدرَك في جودة الحياة للمؤسس", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "ن3 سجلات." },
-        { id: "p6_i16", stage: "نتائج", shape: "matrix", label: "متوسط نسبة نمو الإيرادات + نسبة الشركات المحققة لإيرادات + درجة النضج التنظيمي", source: "المؤسسون (استبيان)", status: "unreviewed", unreviewed: true, notes: "ن3 استبيان." },
-        { id: "p6_i17", stage: "نتائج", shape: "matrix", label: "إجمالي الوظائف المولَّدة + نسبة الوظائف للسعوديين", source: "المؤسسون (استبيان)", status: "unreviewed", unreviewed: true, notes: "ن3 استبيان." },
+        { id: "p6_i29", stage: "نتائج", shape: "matrix", label: "عدد الشركات الباقية بعد سنتين (لكل سنة)", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "العدد الخام؛ يحسب فريق قرارات معدل البقاء." },
+        { id: "p6_i30", stage: "نتائج", shape: "matrix", label: "عدد الشركات الباقية بعد 5 سنوات (لكل سنة)", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "العدد الخام؛ يحسب فريق قرارات معدل البقاء." },
+        { id: "p6_i31", stage: "نتائج", shape: "matrix", label: "عدد الشركات المحققة لإيرادات (لكل سنة)", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "العدد الخام؛ تُحذَف المتوسطات والنسب والمؤشرات المسحية." },
+        { id: "p6_i32", stage: "نتائج", shape: "matrix", label: "إجمالي الوظائف المولَّدة (لكل سنة)", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "" },
+        { id: "p6_i33", stage: "نتائج", shape: "matrix", label: "عدد الوظائف للسعوديين (لكل سنة)", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "العدد الخام؛ يحسب فريق قرارات نسبة التوطين." },
 
         { id: "p6_i18", stage: "أثر", shape: "matrix", label: "إجمالي إيرادات الشركات المتخرجة", source: "البنك / أروقة", status: "unreviewed", unreviewed: true, notes: "" }
       ]
@@ -302,7 +299,7 @@ const REGISTER = {
       unreviewed: false,
       items: [
         { id: "p7_i01", stage: "مدخلات", shape: "matrix", label: "الميزانية السنوية المخصصة", source: "البنك", status: "available", notes: "1,414,686 ريال (بدون ضريبة)." },
-        { id: "p7_i02", stage: "مدخلات", shape: "matrix", label: "نسبة صرف الميزانية (%)", source: "البنك / ركين", status: "available", notes: "" },
+        { id: "p7_i19", stage: "مدخلات", shape: "matrix", label: "المبلغ المصروف من الميزانية (2026)", source: "البنك / ركين", status: "available", notes: "المبلغ الخام المصروف؛ يحسب فريق قرارات نسبة الصرف من المخصص." },
         { id: "p7_i03", stage: "مدخلات", shape: "matrix", label: "عدد مستشاري ركين المشاركين", source: "ركين", status: "available", notes: "" },
         { id: "p7_i04", stage: "مدخلات", shape: "matrix", label: "جاهزية منصة التقييم RCAT وأدوات التأهيل", source: "ركين", status: "available", notes: "" },
         { id: "p7_i05", stage: "مدخلات", shape: "matrix", label: "عدد الشراكات الفعّالة (المركز الوطني والوحدات الإشرافية)", source: "البنك / ركين", status: "available", notes: "" },
@@ -314,13 +311,12 @@ const REGISTER = {
         { id: "p7_i10", stage: "أنشطة", shape: "matrix", label: "عدد اللقاءات المعرفية المنفّذة", source: "ركين", status: "available", notes: "3 لقاءات." },
         { id: "p7_i11", stage: "أنشطة", shape: "matrix", label: "عدد الزيارات الميدانية والجلسات الاستشارية المنفّذة", source: "ركين", status: "available", notes: "3 جلسات/جمعية، 20 ساعة لمسار التعظيم." },
 
-        { id: "p7_i12", stage: "مخرجات", shape: "matrix", label: "عدد الجمعيات المؤهَّلة في كل مسار (تمكين/تعظيم)", source: "ركين", status: "available", notes: "تمكين 40 + تعظيم 15." },
+        { id: "p7_i20", stage: "مخرجات", shape: "matrix", label: "عدد الجمعيات المؤهَّلة — مسار تمكين (2026)", source: "ركين", status: "available", notes: "تمكين 40." },
+        { id: "p7_i21", stage: "مخرجات", shape: "matrix", label: "عدد الجمعيات المؤهَّلة — مسار تعظيم أثر (2026)", source: "ركين", status: "available", notes: "تعظيم 15." },
         { id: "p7_i13", stage: "مخرجات", shape: "matrix", label: "عدد تقارير تقييم الجاهزية الصادرة", source: "ركين", status: "available", notes: "" },
         { id: "p7_i14", stage: "مخرجات", shape: "matrix", label: "عدد خطط تفعيل المنافسات الحكومية المُعدّة", source: "ركين", status: "available", notes: "" },
 
         { id: "p7_i15", stage: "نتائج", shape: "matrix", label: "درجة جاهزية الإسناد (RCAT دخول/خروج)", source: "ركين", status: "available", notes: "سجل (لا استبيان) — ناتج RCAT موثَّق." },
-        { id: "p7_i16", stage: "نتائج", shape: "matrix", label: "التقييم الذاتي لتحسّن الجاهزية + القدرة المُدرَكة على إعداد العروض + فهم معايير المنافسات", source: "منسوبو الجمعيات (استبيان)", status: "available", notes: "self-reported." },
-
         { id: "p7_i17", stage: "أثر", shape: "matrix", label: "عدد الجمعيات التي تقدّمت على فرص إسناد حكومية", source: "ركين", status: "fetch", notes: "يُؤكَّد مع المالك أن ركين تتعقّب التقدّم كسجل." },
         { id: "p7_i18", stage: "أثر", shape: "matrix", label: "عدد الجمعيات التي فازت بعقود إسناد حكومية", source: "ركين", status: "fetch", notes: "مقياس النجاح الجوهري؛ متابعة أثر طويل المدى." }
       ]
@@ -333,6 +329,7 @@ if (typeof window !== "undefined") {
   window.REGISTER = REGISTER;
   window.AVAILABILITY = AVAILABILITY;
   window.DOC_STATUS_OPTIONS = DOC_STATUS_OPTIONS;
+  window.PARTNERSHIP_STATUS_OPTIONS = PARTNERSHIP_STATUS_OPTIONS;
   window.PII_STATUS_OPTIONS = PII_STATUS_OPTIONS;
   window.DEFAULT_YEARS = DEFAULT_YEARS;
 }

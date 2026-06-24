@@ -282,7 +282,7 @@ footer b { color: var(--ink-700); font-weight: 500; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* file input hidden */
-#importFile, #importJson { display: none; }
+#importFile { display: none; }
 </style>
 </head>
 <body>
@@ -306,14 +306,13 @@ footer b { color: var(--ink-700); font-weight: 500; }
   <div class="intro-card">
     <h2>📋 عن هذا النموذج</h2>
     <p style="font-size:13.5px;color:var(--ink-700);margin:0;">
-      هذا نموذج لجمع بيانات السجلات الخاصة ببرامج المسؤولية المجتمعية. يمكنك تعبئته على مراحل دون قلق —
+      هذا نموذج لجمع بيانات السجلات الخاصة ببرامج المسؤولية المجتمعية. يمكنك تعبئته على مراحل —
       تُحفَظ إجاباتك تلقائياً في هذا المتصفح. عند الانتهاء (أو في أي وقت) صدِّر البيانات إلى ملف Excel وأرسله لفريق قرارات.
     </p>
 
     <div class="intro-grid">
       <div class="howto"><div class="ic">💾</div><h3>الحفظ والمتابعة</h3><p>يُحفَظ كل إدخال تلقائياً في هذا الجهاز. أغلِق الصفحة وعُد لاحقاً وستجد بياناتك.</p></div>
       <div class="howto"><div class="ic">📊</div><h3>التصدير إلى Excel</h3><p>زر «تصدير إلى Excel» يُنشئ ملفاً بورقة لكل برنامج — هو الملف الذي تُرسله لنا.</p></div>
-      <div class="howto"><div class="ic">🔄</div><h3>المتابعة عبر الأجهزة</h3><p>للانتقال بين الأجهزة، احفظ «نسخة JSON» وحمّلها على الجهاز الآخر لاستئناف العمل.</p></div>
       <div class="howto"><div class="ic">📎</div><h3>المستندات</h3><p>المستندات لا تُرفَع هنا — حدِّد حالتها فقط، وأرسل الملفات نفسها بالبريد بشكل منفصل.</p></div>
     </div>
 
@@ -339,10 +338,7 @@ footer b { color: var(--ink-700); font-weight: 500; }
   <div class="save-state"><span class="dot" id="saveDot"></span><span id="saveText">جاهز</span></div>
   <div class="actions">
     <button class="btn primary" id="btnExport">⬇ تصدير إلى Excel</button>
-    <button class="btn" id="btnSaveJson">💾 حفظ نسخة (JSON)</button>
-    <button class="btn" id="btnLoadJson">📂 تحميل نسخة (JSON)</button>
     <button class="btn danger" id="btnClear">🗑 مسح الكل</button>
-    <input type="file" id="importJson" accept=".json" />
   </div>
 </div>
 
@@ -350,7 +346,7 @@ footer b { color: var(--ink-700); font-weight: 500; }
 
 <footer>
   <div class="wrap">
-    <span>أُعدّ بواسطة <b>قرارات (Qararat AI)</b> — رئاسة قياس الأثر · للبنك الأهلي السعودي</span>
+    <span>أُعدّ بواسطة <b>قرارات (Qararat AI)</b> · للبنك الأهلي السعودي</span>
     <span id="footMeta"></span>
   </div>
 </footer>
